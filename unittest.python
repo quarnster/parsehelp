@@ -64,4 +64,14 @@ if get_type_definition(test, """int apps = Integer.parseInt(prop.getProperty("a"
 if extract_completion("prop.GetColor().Clamp().") != "prop.GetColor().Clamp().":
     raise Exception("Didn't extract completion properly")
 
+test = """DVFSStats dvfs = new DVFSStats();
+DVFSStats."""
+if get_type_definition(test, test.split("\n")[1]) != (-1, -1, "DVFSStats", None, "."):
+    raise Exception("Couldn't parse type definition properly")
+
+test = """CPUStats.CPULoad cpuLoad = cpu.new CPULoad();
+cpuLoad."""
+if get_type_definition(test, test.split("\n")[1]) != (1, 18, "CPUStats.CPULoad", "cpuLoad", "."):
+    raise Exception("Couldn't parse type definition properly")
+
 print "all is well"

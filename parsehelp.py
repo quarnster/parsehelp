@@ -226,7 +226,7 @@ def remove_includes(data):
             break
     return data
 
-_invalid = """\\(\\s\\{,\\*\\&\\-\\+\\/;=%\)\.\"!"""
+_invalid = """\\(\\s\\{,\\*\\&\\-\\+\\/;=%\)\"!"""
 
 
 def extract_variables(data):
@@ -287,7 +287,8 @@ def get_var_type(data, var):
     match = None
 
     for m in regex.finditer(data):
-        if m.group(1) in _keywords:
+        t = m.group(1).strip()
+        if t in _keywords:
             continue
         match = m
     if match and match.group(1):
@@ -342,7 +343,7 @@ def get_type_definition(data, before):
     else:
         match = get_var_type(data, var)
     if match == None:
-        return -1, -1, None, var, tocomplete
+        return -1, -1, var, None, tocomplete
     line = data[:match.start(2)].count("\n") + 1
     column = len(data[:match.start(2)].split("\n")[-1])+1
     typename = match.group(1).strip()
