@@ -74,4 +74,8 @@ cpuLoad."""
 if get_type_definition(test, test.split("\n")[1]) != (1, 18, "CPUStats.CPULoad", "cpuLoad", "."):
     raise Exception("Couldn't parse type definition properly")
 
+test = """ShortcutIconResource iconRes = Intent.ShortcutIconResource.fromContext(this, R.drawable.);"""
+if get_type_definition(test, test[:-2]) != (-1, -1, "R", None, ".drawable."):
+    raise Exception("Couldn't parse type definition properly")
+
 print "all is well"

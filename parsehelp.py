@@ -135,7 +135,14 @@ def collapse_square_brackets(before):
 def extract_completion(before):
     before = collapse_parenthesis(before)
     before = collapse_square_brackets(before)
-    return re.search("(([^,\ \[\]()\t]+(\(\))?(\[\])?)+(\.|\->))$", before).group(1)
+    ret = ""
+    while True:
+        match = re.search("(([^.,\ \[\]()\t]+(\(\)|\[\])*)(\.|\->))$", before)
+        if not match:
+            break
+        ret = match.group(1) + ret
+        before = before[:-len(match.group(1))].strip()
+    return ret
 
 _keywords = ["return", "new", "delete", "class", "define", "using", "void", "template", "public:", "protected:", "private:", "public", "private", "protected", "typename"]
 
