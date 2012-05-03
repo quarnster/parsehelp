@@ -93,4 +93,11 @@ extends Activity
         super."""
 if get_type_definition(test, test.split("\n")[-1]) != (-1, -1, 'Activity', 'super', '.'):
     raise Exception("Couldn't parse type definition properly")
+
+test = """                for (Class clazz : c.getClasses())
+                {
+                    clazz."""
+if get_type_definition(test, test.split("\n")[-1]) != (1, 28, 'Class', 'clazz', '.'):
+    raise Exception("Couldn't parse type definition properly")
+
 print "all is well"
