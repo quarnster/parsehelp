@@ -183,11 +183,22 @@ def extract_class(data):
     data = remove_preprocessing(data)
     data = collapse_brackets(data)
     data = remove_classes(data)
-    regex = re.compile("class\s+([^;{\\s:]+)\\s*(:|;|\{)")
+    regex = re.compile("class\s+([^;{\\s:]+)\\s*(:|;|\{|extends|implements)", re.MULTILINE)
     ret = None
-    for match in regex.finditer(data, re.MULTILINE):
+    for match in regex.finditer(data):
         ret = match.group(1)
     return ret
+
+
+def extract_inheritance(data, classname):
+    data = remove_preprocessing(data)
+    data = collapse_brackets(data)
+    data = remove_classes(data)
+    regex = re.compile("class\s+%s\\s*(:|extends)\\s+([^\\s,\{]+)" % classname, re.MULTILINE)
+    match = regex.search(data)
+    if match != None:
+        return match.group(2)
+    return None
 
 
 def remove_classes(data):
@@ -331,20 +342,14 @@ def get_type_definition(data, before):
         tocomplete = "%s%s" % (match.group(2), tocomplete)
 
     if var == "this":
-        data = collapse_brackets(data[:data.rfind(var)])
-        data = remove_empty_classes(data)
-        idx = data.rfind("class")
-        match = None
-        ret = ""
-        while idx != -1:
-            match = re.search("class\s+([^\s\{]+)([^\{]*\{)(.*)", data[idx:])
-            if len(ret):
-                ret = "%s$%s" % (match.group(1), ret)
-            else:
-                ret = match.group(1)
-            idx = data.rfind("class", 0, idx)
-        line = column = 0  # TODO
-        return line, column, ret, var, tocomplete
+        clazz = extract_class(data)
+        line = column = -1  # TODO
+        return line, column, clazz, var, tocomplete
+    elif var == "super":
+        clazz = extract_class(data)
+        if clazz:
+            sup = extract_inheritance(data, clazz)
+            return -1, -1, sup, var, tocomplete
     elif match.group(2) == "::":
         return 0, 0, var, var, tocomplete
     else:

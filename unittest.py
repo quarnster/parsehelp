@@ -81,4 +81,16 @@ if get_type_definition(test, test[:-2]) != (-1, -1, "R", None, ".drawable."):
 test = """Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED|Intent."""
 if get_type_definition(test, test) != (-1, -1, "Intent", None, "."):
     raise Exception("Couldn't parse type definition properly")
+
+test = """public class LaunchApp
+extends Activity
+{
+
+    @Override
+    public void onCreate(Bundle b)
+    {
+        super.onCreate(b);
+        super."""
+if get_type_definition(test, test.split("\n")[-1]) != (-1, -1, 'Activity', 'super', '.'):
+    raise Exception("Couldn't parse type definition properly")
 print "all is well"
