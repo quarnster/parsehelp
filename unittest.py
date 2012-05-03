@@ -100,4 +100,31 @@ test = """                for (Class clazz : c.getClasses())
 if get_type_definition(test, test.split("\n")[-1]) != (1, 28, 'Class', 'clazz', '.'):
     raise Exception("Couldn't parse type definition properly")
 
+
+test = """package com.a.b;
+
+public class TestActivity
+    extends Activity
+{
+
+    class A
+    {
+
+    }
+
+    private static class ContextFactory implements GLSurfaceView.EGLContextFactory {
+        class Blah
+        {
+            public int test()
+            {
+                return 0x1337;
+            }
+
+        }
+        public EGLContext createContext(EGL10 egl, EGLDisplay display, EGLConfig eglConfig) {
+            this."""
+
+if get_type_definition(test, test.split("\n")[-1]) != (-1, -1, 'ContextFactory', 'this', '.'):
+    raise Exception("Couldn't parse type definition properly")
+
 print "all is well"
