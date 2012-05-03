@@ -202,7 +202,7 @@ def extract_inheritance(data, classname):
 
 
 def remove_classes(data):
-    regex = re.compile("class\s+\S+\s*\{\}\s*;?", re.MULTILINE)
+    regex = re.compile("class\s+[^{]+{\}\s*;?", re.MULTILINE)
     return regex.sub("", data)
 
 

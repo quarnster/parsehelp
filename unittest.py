@@ -127,4 +127,27 @@ public class TestActivity
 if get_type_definition(test, test.split("\n")[-1]) != (-1, -1, 'ContextFactory', 'this', '.'):
     raise Exception("Couldn't parse type definition properly")
 
+test = """package a.b.c;
+public class PMQuadtree {
+    /// Stuff
+    public abstract class Node {
+        // Node Stuff
+    }
+
+    public class White extends Node {
+    }
+
+    public class Black extends Node {
+    }
+
+    public class Gray extends Node {
+    }
+
+    public PMQuadtree(final Validator validator, final int spatialWidth,
+            final int spatialHeight, final int order) {
+        this."""
+
+if get_type_definition(test, test.split("\n")[-1]) != (-1, -1, "PMQuadtree", "this", "."):
+    raise Exception("Couldn't parse type definition properly")
+
 print "all is well"
