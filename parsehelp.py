@@ -137,7 +137,7 @@ def extract_completion(before):
     before = collapse_square_brackets(before)
     ret = ""
     while True:
-        match = re.search("(([^.,\ \[\]()\t]+(\(\)|\[\])*)(\.|\->))$", before)
+        match = re.search("(([^|.,\ \[\]()\t]+(\(\)|\[\])*)(\.|\->))$", before)
         if not match:
             break
         ret = match.group(1) + ret

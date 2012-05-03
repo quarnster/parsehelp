@@ -78,4 +78,7 @@ test = """ShortcutIconResource iconRes = Intent.ShortcutIconResource.fromContext
 if get_type_definition(test, test[:-2]) != (-1, -1, "R", None, ".drawable."):
     raise Exception("Couldn't parse type definition properly")
 
+test = """Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED|Intent."""
+if get_type_definition(test, test) != (-1, -1, "Intent", None, "."):
+    raise Exception("Couldn't parse type definition properly")
 print "all is well"
