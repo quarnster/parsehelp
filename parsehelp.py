@@ -115,16 +115,16 @@ def collapse_square_brackets(before):
     count = 0
     end = -1
     while i >= 0:
-        a = before.rfind("(", 0, i)
-        b = before.rfind(")", 0, i)
+        a = before.rfind("[", 0, i)
+        b = before.rfind("]", 0, i)
         i = max(a, b)
         if i == -1:
             break
-        if before[i] == ')':
+        if before[i] == ']':
             count += 1
             if end == -1:
                 end = i
-        elif before[i] == '(':
+        elif before[i] == '[':
             count -= 1
             if count == 0 and end != -1:
                 before = "%s%s" % (before[:i+1], before[end:])
@@ -297,7 +297,7 @@ def get_base_type(data):
 
 
 def get_var_type(data, var):
-    regex = re.compile("\\b([^%s]+[ \s\*\&]+)(%s)\s*(\(|\;|,|\)|=|:)" % (_invalid, var))
+    regex = re.compile("\\b([^%s]+[ \s\*\&]+)(%s)\s*(\[|\(|\;|,|\)|=|:)" % (_invalid, var))
 
     origdata = data
     data = collapse_ltgt(data)
@@ -335,8 +335,12 @@ def remove_empty_classes(data):
 
 def get_type_definition(data, before):
     before = extract_completion(before)
-    match = re.search("([^\.\[\-:]+)[^\.\-:]*(\.|->|::)(.*)", before)
+    match = re.search("([^\.\-:]+)[^\.\-:]*(\.|->|::)(.*)", before)
     var = match.group(1)
+    extra = ""
+    if var.endswith("[]"):
+        extra = var[var.find("["):]
+        var = var[:var.find("[")]
     tocomplete = before[match.start(2):match.end(3)]
     if match.group(2) == "->":
         tocomplete = "%s%s" % (match.group(2), tocomplete)
@@ -359,7 +363,7 @@ def get_type_definition(data, before):
     line = data[:match.start(2)].count("\n") + 1
     column = len(data[:match.start(2)].split("\n")[-1])+1
     typename = match.group(1).strip()
-    return line, column, typename, var, tocomplete
+    return line, column, typename+extra, var, tocomplete
 
 
 def template_split(data):

@@ -150,4 +150,18 @@ public class PMQuadtree {
 if get_type_definition(test, test.split("\n")[-1]) != (-1, -1, "PMQuadtree", "this", "."):
     raise Exception("Couldn't parse type definition properly")
 
+test = """String args[] = cmd.split(" ");
+                System.err.println(args.length);
+                for (int i = 0; i < args.length; i++)
+                {
+                    System.err.println(args[i]);
+                }
+
+                try
+                {
+                    if (args[0].equals("-quit"))
+                    {
+                        args[0]."""
+if get_type_definition(test, test.split("\n")[-1]) != (1, 8, "String[]", "args", "."):
+    raise Exception("Couldn't parse type definition properly")
 print "all is well"
