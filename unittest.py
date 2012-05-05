@@ -164,4 +164,12 @@ test = """String args[] = cmd.split(" ");
                         args[0]."""
 if get_type_definition(test, test.split("\n")[-1]) != (1, 8, "String[]", "args", "."):
     raise Exception("Couldn't parse type definition properly")
+
+test = """                        foreach (Assembly asm in AssembliesLoaded)
+                        {
+                            foreach (Type t3 in asm.GetTypes())
+                            {
+                                if (t3."""
+if get_type_definition(test, test.split("\n")[-1]) != (3, 43, "Type", "t3", "."):
+    raise Exception("Couldn't parse type definition properly")
 print "all is well"

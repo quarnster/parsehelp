@@ -297,7 +297,7 @@ def get_base_type(data):
 
 
 def get_var_type(data, var):
-    regex = re.compile("\\b([^%s]+[ \s\*\&]+)(%s)\s*(\[|\(|\;|,|\)|=|:)" % (_invalid, var))
+    regex = re.compile("\\b([^%s]+[ \s\*\&]+)(%s)\s*(\[|\(|\;|,|\)|=|:|in\s+)" % (_invalid, var))
 
     origdata = data
     data = collapse_ltgt(data)
