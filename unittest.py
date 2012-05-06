@@ -172,4 +172,33 @@ test = """                        foreach (Assembly asm in AssembliesLoaded)
                                 if (t3."""
 if get_type_definition(test, test.split("\n")[-1]) != (3, 43, "Type", "t3", "."):
     raise Exception("Couldn't parse type definition properly")
+
+test = """class MyStruct
+{
+public:
+    int type;
+
+};
+
+int main(int argc, char const *argv[])
+{
+    MyStruct a;
+    int b = 0;
+    int MyStruct = 0;
+    printf("%d, %d\n", MyStruct, a.type);
+    while (int y = 1)
+    {
+        y++;
+    }
+    for (int i = 0; i < 10; i++)
+    {
+
+    }
+    int z = MyStruct* b;
+    int q = z & b;
+    printf("%d\n", q*z);
+    printf("%d\n", q&z);"""
+if extract_variables(test) != [('int', 'argc'), ('char const *[]', 'argv'), ('MyStruct', 'a'), ('int', 'b'), ('int', 'MyStruct'), ('int', 'z'), ('int', 'q')]:
+    raise Exception("Couldn't extract variables properly")
+
 print "all is well"

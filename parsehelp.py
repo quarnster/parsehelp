@@ -256,26 +256,28 @@ def extract_variables(data):
     data = remove_functions(data)
     data = remove_namespaces(data)
     data = remove_classes(data)
+    data = re.sub("\([^)]*?\)\\s*;", "()", data, re.MULTILINE)
 
-    pattern = "(\\b[^%s]+[ \\t*&]+(const)?[ \\t*&]*)(\\b[^%s\[\>]+)[ \\t]*(\;|,|\)|=|\[)" % (_invalid, _invalid)
+    endpattern = "\;|,|\)|=|\["
+    pattern = "(^\\s*|,|\()\\s*(\\b[^%s]+[\\s*&]+(const)?[\\s*&]*)(\\b[^%s\[\>]+)\\s*(?=%s)" % (_invalid, _invalid, endpattern)
     regex = re.compile(pattern, re.MULTILINE)
     regex2 = re.compile("[^)]+\)+\s+\{")
     ret = []
     for m in regex.finditer(data):
-        type = get_base_type(m.group(1))
+        type = get_base_type(m.group(2))
         if type in _keywords or type.startswith("template"):
             continue
-        if m.group(4) == "(":
-            left = data[m.end():]
+        pat = "%s\\s*%s\\s*(%s)" % (m.group(2).replace("*", "\\*"), m.group(4), endpattern)
+        end = re.search(pat, data)
+        if end.group(1) == "(":
+            # Remove the declaration if it's inside of a () {}?
+            left = data[end.end():]
             if regex.match(left) or regex2.match(left, re.MULTILINE):
                 continue
-        var = m.group(3).strip()
-        type = m.group(1).strip()
-        for i in range(len(ret)):
-            if ret[i][1] == var:
-                ret[i] = (type, var)
-                var = None
-                break
+        var = m.group(4).strip()
+        type = m.group(2).strip()
+        if end.group(1) == "[":
+            type += re.search("([\\[\\]]+)", data[end.start():]).group(1)
         if var != None:
             if "<" in type and ">" in type:
                 s = "\\b(%s.+%s)(const)?[ \\t*&]*(%s)" % (type[:type.find("<")+1], type[type.find(">"):], var)
