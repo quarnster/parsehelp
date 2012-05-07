@@ -292,8 +292,10 @@ def extract_variables(data):
 
 
 def get_base_type(data):
+    data = re.sub("\s*const\s*", "", data)
+    data = re.sub("\s*static\s*", "", data)
     data = data.strip()
-    data = data.replace("&", "").replace("*", "")
+    data = data.replace("&", "").replace("*", "").replace("[]", "")
     data = data.strip()
     return data
 

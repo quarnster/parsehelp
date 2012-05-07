@@ -196,9 +196,11 @@ int main(int argc, char const *argv[])
     }
     int z = MyStruct* b;
     int q = z & b;
-    printf("%d\n", q*z);
-    printf("%d\n", q&z);"""
+    printf("%d\n", q* z);
+    printf("%d\n", q& z);"""
 if extract_variables(test) != [('int', 'argc'), ('char const *[]', 'argv'), ('MyStruct', 'a'), ('int', 'b'), ('int', 'MyStruct'), ('int', 'z'), ('int', 'q')]:
     raise Exception("Couldn't extract variables properly")
 
+if get_base_type("static const char const *[]") != "char":
+    raise Exception("Couldn't properly get the base type")
 print "all is well"
