@@ -224,4 +224,22 @@ test = """bool Mesh::CopyToVBO ( UInt32 wantedChannels, VBO& vbo )
 """
 if extract_class_from_function(test) != "Mesh":
     raise Exception("Failed to extract class")
+
+
+test = """using namespace std;
+using namespace std2;
+using namespace some::long::namespace as s;
+namespace std3
+{
+
+};
+
+namespace std4
+{"""
+
+if extract_namespace(test) != "std4":
+    raise Exception("Failed to extract the right namespace")
+
+if extract_used_namespaces(test) != ['std', 'std2', 'some::long::namespace as s']:
+    raise Exception("Faild to extract the right used namespaces")
 print "all is well"
