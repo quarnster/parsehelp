@@ -203,4 +203,16 @@ if extract_variables(test) != [('int', 'argc'), ('char const *[]', 'argv'), ('My
 
 if get_base_type("static const char const *[]") != "char":
     raise Exception("Couldn't properly get the base type")
+
+test = """CacheCompletionResults* cache_complete_startswith(Cache* cache, const char *prefix)
+{
+    cache->complete(const char *prefix)->entries."""
+if get_type_definition(test, test.split("\n")[-1]) != (1, 58, 'Cache*', 'cache', '->complete()->entries.'):
+    raise Exception("Couldn't parse type definition properly")
+
+test = """CacheCompletionResults* cache_complete_startswith(Cache* cache, const char *prefix)
+{
+    cache->complete(const char *prefix)->entries[10]->"""
+if get_type_definition(test, test.split("\n")[-1]) != (1, 58, 'Cache*', 'cache', '->complete()->entries[]->'):
+    raise Exception("Couldn't parse type definition properly")
 print "all is well"

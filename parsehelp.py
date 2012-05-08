@@ -137,11 +137,11 @@ def extract_completion(before):
     before = collapse_square_brackets(before)
     ret = ""
     while True:
-        match = re.search("(([^|.,\ \[\]()\t]+(\(\)|\[\])*)(\.|\->))$", before)
+        match = re.search("((\.|\->)?([^|.,\ \[\]\(\)\t]+(\(\)|\[\])*)(\.|\->))$", before)
         if not match:
             break
-        ret = match.group(1) + ret
-        before = before[:-len(match.group(1))].strip()
+        ret = match.group(3) + match.group(5) + ret
+        before = before[:-len(match.group(3))-len(match.group(5))].strip()
     return ret
 
 _keywords = ["return", "new", "delete", "class", "define", "using", "void", "template", "public:", "protected:", "private:", "public", "private", "protected", "typename"]
@@ -346,8 +346,6 @@ def get_type_definition(data, before):
         extra = var[var.find("["):]
         var = var[:var.find("[")]
     tocomplete = before[match.start(2):match.end(3)]
-    if match.group(2) == "->":
-        tocomplete = "%s%s" % (match.group(2), tocomplete)
 
     if var == "this":
         clazz = extract_class(data)
