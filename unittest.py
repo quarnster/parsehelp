@@ -215,4 +215,13 @@ test = """CacheCompletionResults* cache_complete_startswith(Cache* cache, const 
     cache->complete(const char *prefix)->entries[10]->"""
 if get_type_definition(test, test.split("\n")[-1]) != (1, 58, 'Cache*', 'cache', '->complete()->entries[]->'):
     raise Exception("Couldn't parse type definition properly")
+
+test = """bool Mesh::CopyToVBO ( UInt32 wantedChannels, VBO& vbo )
+{
+    std::vector<abc> test();
+    {
+        something here
+"""
+if extract_class_from_function(test) != "Mesh":
+    raise Exception("Failed to extract class")
 print "all is well"
