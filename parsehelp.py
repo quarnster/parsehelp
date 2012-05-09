@@ -148,9 +148,9 @@ _keywords = ["return", "new", "delete", "class", "define", "using", "void", "tem
 
 
 def extract_used_namespaces(data):
-    regex = re.compile("\s*using\s+(namespace\s+)?([^;]+)")
+    regex = re.compile("\s*using\s+(namespace\s+)?([^;]+)", re.MULTILINE)
     ret = []
-    for match in regex.finditer(data, re.MULTILINE):
+    for match in regex.finditer(data):
         toadd = match.group(2)
         if match.group(1) == None:
             toadd = toadd[:toadd.rfind("::")]
@@ -161,9 +161,9 @@ def extract_used_namespaces(data):
 def extract_namespace(data):
     data = collapse_brackets(data)
     data = remove_namespaces(data)
-    regex = re.compile("namespace\s+([^{\s]+)")
+    regex = re.compile("namespace\s+([^{\s]+)\s*\{", re.MULTILINE)
     ret = ""
-    for match in regex.finditer(data, re.MULTILINE):
+    for match in regex.finditer(data):
         if len(ret):
             ret += "::"
         ret += match.group(1)
@@ -174,7 +174,7 @@ def extract_class_from_function(data):
     data = collapse_brackets(data)
     data = remove_functions(data)
     ret = None
-    for match in re.finditer("(.*?)(\w+)::~?(\w+)\([^)]*\)\s*(const)?\s*\{", data, re.MULTILINE):
+    for match in re.finditer("(.*?)(\w+)::~?(\w+)\\s*\([^)]*\)\s*(const)?\s*\{", data, re.MULTILINE):
         ret = match.group(2)
     return ret
 

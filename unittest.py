@@ -216,6 +216,33 @@ test = """CacheCompletionResults* cache_complete_startswith(Cache* cache, const 
 if get_type_definition(test, test.split("\n")[-1]) != (1, 58, 'Cache*', 'cache', '->complete()->entries[]->'):
     raise Exception("Couldn't parse type definition properly")
 
+test = """bool Mesh::CopyToVBO ( UInt32 wantedChannels, VBO& vbo )
+{
+    std::vector<abc> test();
+    {
+        something here
+"""
+if extract_class_from_function(test) != "Mesh":
+    raise Exception("Failed to extract class")
+
+
+test = """using namespace std;
+using namespace std2;
+using namespace some::long::namespace as s;
+namespace std3
+{
+
+};
+
+namespace std4
+{"""
+
+if extract_namespace(test) != "std4":
+    raise Exception("Failed to extract the right namespace")
+
+if extract_used_namespaces(test) != ['std', 'std2', 'some::long::namespace as s']:
+    raise Exception("Faild to extract the right used namespaces")
+
 test = "ArrayList<ArrayList<Integer> >"
 data = solve_template(test)
 if data != ('ArrayList', [('ArrayList', [('Integer', None)])]):
@@ -239,4 +266,5 @@ if data != ('Integer', None):
 
 if make_template(data) != test:
     raise Exception("Couldn't make template properly")
+
 print "all is well"
