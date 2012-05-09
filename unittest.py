@@ -267,4 +267,9 @@ if data != ('Integer', None):
 if make_template(data) != test:
     raise Exception("Couldn't make template properly")
 
+test = """Type[] generic = m.getGenericParameterTypes();
+generic."""
+if get_type_definition(test, test.split("\n")[-1]) != (1, 8, 'Type[]', 'generic', '.'):
+    raise Exception("Couldn't get type definition")
+
 print "all is well"

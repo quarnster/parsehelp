@@ -326,7 +326,7 @@ def get_var_type(data, var):
                 match = m
     if match and match.group(1):
         # Just so that it reports the correct location in the file
-        regex = re.compile("(%s)(%s)(\(|\;|,|\)|=)" % (match.group(1), match.group(2)))
+        regex = re.compile("(%s)(%s)(\(|\;|,|\)|=)" % (re.escape(match.group(1)), re.escape(match.group(2))))
         for m in regex.finditer(origdata):
             match = m
     return match
