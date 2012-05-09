@@ -215,4 +215,28 @@ test = """CacheCompletionResults* cache_complete_startswith(Cache* cache, const 
     cache->complete(const char *prefix)->entries[10]->"""
 if get_type_definition(test, test.split("\n")[-1]) != (1, 58, 'Cache*', 'cache', '->complete()->entries[]->'):
     raise Exception("Couldn't parse type definition properly")
+
+test = "ArrayList<ArrayList<Integer> >"
+data = solve_template(test)
+if data != ('ArrayList', [('ArrayList', [('Integer', None)])]):
+    raise Exception("Couldn't solve template properly")
+
+if make_template(data) != test:
+    raise Exception("Couldn't make template properly")
+
+test = "ArrayList<Integer>"
+data = solve_template(test)
+if data != ('ArrayList', [('Integer', None)]):
+    raise Exception("Couldn't solve template properly")
+
+if make_template(data) != test:
+    raise Exception("Couldn't make template properly")
+
+test = "Integer"
+data = solve_template(test)
+if data != ('Integer', None):
+    raise Exception("Couldn't solve template properly")
+
+if make_template(data) != test:
+    raise Exception("Couldn't make template properly")
 print "all is well"

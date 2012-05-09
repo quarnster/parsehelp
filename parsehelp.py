@@ -403,6 +403,18 @@ def solve_template(typename):
     return template.group(1), args
 
 
+def make_template(data):
+    if data[1] != None:
+        ret = ""
+        for param in data[1]:
+            sub = make_template(param)
+            if len(ret):
+                ret += ", "
+            ret += sub
+        return "%s<%s%s>" % (data[0], sub, ' ' if sub[-1] == '>' else '')
+    return data[0]
+
+
 def extract_line_until_offset(data, offset):
     return data[:offset].split("\n")[-1]
 
