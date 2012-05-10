@@ -317,13 +317,34 @@ def get_var_type(data, var):
         key = get_base_type(match.group(1))
         if key.endswith(">"):
             name = match.group(1)[:match.group(1).find("<")]
-            regex = re.compile("\\b(%s<.+>[\\s\*\&]+)(%s)" % (name, var))
+            regex = re.compile("(%s<.+>[\\s\*\&]+)(%s)" % (name, var))
             match = None
             for m in regex.finditer(origdata):
                 key = get_base_type(m.group(1))
                 if key in _keywords:
                     continue
                 match = m
+            if match:
+                data = origdata[match.start(1):match.end(1)]
+                i = len(data)-1
+                count = 0
+                while i > 0:
+                    a = data.rfind(">", 0, i)
+                    b = data.rfind("<", 0, i)
+                    i = max(a, b)
+                    if i == -1:
+                        break
+                    if data[i] == ">":
+                        count += 1
+                    elif data[i] == "<":
+                        count -= 1
+                        if count == 0:
+                            data = data[i:]
+                            break
+                regex = re.compile("(%s%s)(%s)" % (name, data, var))
+                for m in regex.finditer(origdata):
+                    match = m
+
     if match and match.group(1):
         # Just so that it reports the correct location in the file
         regex = re.compile("(%s)(%s)(\(|\;|,|\)|=)" % (re.escape(match.group(1)), re.escape(match.group(2))))

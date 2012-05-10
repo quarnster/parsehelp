@@ -272,4 +272,17 @@ generic."""
 if get_type_definition(test, test.split("\n")[-1]) != (1, 8, 'Type[]', 'generic', '.'):
     raise Exception("Couldn't get type definition")
 
+test = """class Test
+{
+    protected final P1<F2<RoadNew, P2<Node, Rectangle2D.Double>, Either<Throwable, P2<Node, Rectangle2D.Double>>>> fAdd =
+        new P1<F2<RoadNew, P2<Node, Rectangle2D.Double>, Either<Throwable, P2<Node, Rectangle2D.Double>>>>() {
+        @Override
+        public F2<RoadNew, P2<Node, Rectangle2D.Double>, Either<Throwable, P2<Node, Rectangle2D.Double>>> _1() {
+                return new F2<RoadNew, P2<Node, Rectangle2D.Double>, Either<Throwable, P2<Node, Rectangle2D.Double>>>() {
+                @Override
+                public Either<Throwable, P2<Node, Rectangle2D.Double>> f( final RoadNew road, final P2<Node, Rectangle2D.Double> p ) {
+                    if( Inclusive2DIntersectionVerifier.intersects( road, p._2() ) ) {
+                        p."""
+if get_type_definition(test, test.split("\n")[-1]) != (9, 130, 'P2<Node, Rectangle2D.Double>', 'p', '.'):
+    raise Exception("Couldn't get the type definition")
 print "all is well"
