@@ -135,6 +135,7 @@ def collapse_square_brackets(before):
 def extract_completion(before):
     before = collapse_parenthesis(before)
     before = collapse_square_brackets(before)
+    before = before.split("\n")[-1]
     ret = ""
     while True:
         match = re.search("((\.|\->)?([^|.,\ \[\]\(\)\t]+(\(\)|\[\])*)(\.|\->))$", before)
@@ -304,8 +305,10 @@ def get_var_type(data, var):
     regex = re.compile("\\b([^%s]+[ \s\*\&]+)(%s)\s*(\[|\(|\;|,|\)|=|:|in\s+)" % (_invalid, var))
 
     origdata = data
+    data = remove_preprocessing(data)
     data = collapse_ltgt(data)
     data = collapse_brackets(data)
+
     match = None
 
     for m in regex.finditer(data):
@@ -358,8 +361,8 @@ def remove_empty_classes(data):
     return data
 
 
-def get_type_definition(data, before):
-    before = extract_completion(before)
+def get_type_definition(data):
+    before = extract_completion(data)
     match = re.search("([^\.\-:]+)[^\.\-:]*(\.|->|::)(.*)", before)
     var = match.group(1)
     extra = ""
@@ -432,7 +435,7 @@ def make_template(data):
             if len(ret):
                 ret += ", "
             ret += sub
-        return "%s<%s%s>" % (data[0], sub, ' ' if sub[-1] == '>' else '')
+        return "%s<%s%s>" % (data[0], ret, ' ' if ret[-1] == '>' else '')
     return data[0]
 
 

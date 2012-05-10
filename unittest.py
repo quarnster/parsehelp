@@ -54,11 +54,11 @@ if extract_variables(test) != [('int', 'itShouldPickupThis'), ('Type&', 't1'), (
 
 test = """Properties prop = new Properties();
 int apps = Integer.parseInt(prop."""
-if get_type_definition(test, "int apps = Integer.parseInt(prop.") != (1, 12, "Properties", "prop", "."):
+if get_type_definition(test) != (1, 12, "Properties", "prop", "."):
     raise Exception("Didn't get type definition properly")
 test = """Properties prop = new Properties();
 int apps = Integer.parseInt(prop.getProperty("a")."""
-if get_type_definition(test, """int apps = Integer.parseInt(prop.getProperty("a").""") != (1, 12, "Properties", "prop", ".getProperty()."):
+if get_type_definition(test) != (1, 12, "Properties", "prop", ".getProperty()."):
     raise Exception("Didn't get type definition properly")
 
 if extract_completion("prop.GetColor().Clamp().") != "prop.GetColor().Clamp().":
@@ -66,20 +66,20 @@ if extract_completion("prop.GetColor().Clamp().") != "prop.GetColor().Clamp().":
 
 test = """DVFSStats dvfs = new DVFSStats();
 DVFSStats."""
-if get_type_definition(test, test.split("\n")[1]) != (-1, -1, "DVFSStats", None, "."):
+if get_type_definition(test) != (-1, -1, "DVFSStats", None, "."):
     raise Exception("Couldn't parse type definition properly")
 
 test = """CPUStats.CPULoad cpuLoad = cpu.new CPULoad();
 cpuLoad."""
-if get_type_definition(test, test.split("\n")[1]) != (1, 18, "CPUStats.CPULoad", "cpuLoad", "."):
+if get_type_definition(test) != (1, 18, "CPUStats.CPULoad", "cpuLoad", "."):
     raise Exception("Couldn't parse type definition properly")
 
-test = """ShortcutIconResource iconRes = Intent.ShortcutIconResource.fromContext(this, R.drawable.);"""
-if get_type_definition(test, test[:-2]) != (-1, -1, "R", None, ".drawable."):
+test = """ShortcutIconResource iconRes = Intent.ShortcutIconResource.fromContext(this, R.drawable."""
+if get_type_definition(test) != (-1, -1, "R", None, ".drawable."):
     raise Exception("Couldn't parse type definition properly")
 
 test = """Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED|Intent."""
-if get_type_definition(test, test) != (-1, -1, "Intent", None, "."):
+if get_type_definition(test) != (-1, -1, "Intent", None, "."):
     raise Exception("Couldn't parse type definition properly")
 
 test = """public class LaunchApp
@@ -91,13 +91,13 @@ extends Activity
     {
         super.onCreate(b);
         super."""
-if get_type_definition(test, test.split("\n")[-1]) != (-1, -1, 'Activity', 'super', '.'):
+if get_type_definition(test) != (-1, -1, 'Activity', 'super', '.'):
     raise Exception("Couldn't parse type definition properly")
 
 test = """                for (Class clazz : c.getClasses())
                 {
                     clazz."""
-if get_type_definition(test, test.split("\n")[-1]) != (1, 28, 'Class', 'clazz', '.'):
+if get_type_definition(test) != (1, 28, 'Class', 'clazz', '.'):
     raise Exception("Couldn't parse type definition properly")
 
 
@@ -124,7 +124,7 @@ public class TestActivity
         public EGLContext createContext(EGL10 egl, EGLDisplay display, EGLConfig eglConfig) {
             this."""
 
-if get_type_definition(test, test.split("\n")[-1]) != (-1, -1, 'ContextFactory', 'this', '.'):
+if get_type_definition(test) != (-1, -1, 'ContextFactory', 'this', '.'):
     raise Exception("Couldn't parse type definition properly")
 
 test = """package a.b.c;
@@ -147,7 +147,7 @@ public class PMQuadtree {
             final int spatialHeight, final int order) {
         this."""
 
-if get_type_definition(test, test.split("\n")[-1]) != (-1, -1, "PMQuadtree", "this", "."):
+if get_type_definition(test) != (-1, -1, "PMQuadtree", "this", "."):
     raise Exception("Couldn't parse type definition properly")
 
 test = """String args[] = cmd.split(" ");
@@ -162,7 +162,7 @@ test = """String args[] = cmd.split(" ");
                     if (args[0].equals("-quit"))
                     {
                         args[0]."""
-if get_type_definition(test, test.split("\n")[-1]) != (1, 8, "String[]", "args", "."):
+if get_type_definition(test) != (1, 8, "String[]", "args", "."):
     raise Exception("Couldn't parse type definition properly")
 
 test = """                        foreach (Assembly asm in AssembliesLoaded)
@@ -170,7 +170,7 @@ test = """                        foreach (Assembly asm in AssembliesLoaded)
                             foreach (Type t3 in asm.GetTypes())
                             {
                                 if (t3."""
-if get_type_definition(test, test.split("\n")[-1]) != (3, 43, "Type", "t3", "."):
+if get_type_definition(test) != (3, 43, "Type", "t3", "."):
     raise Exception("Couldn't parse type definition properly")
 
 test = """class MyStruct
@@ -207,13 +207,13 @@ if get_base_type("static const char const *[]") != "char":
 test = """CacheCompletionResults* cache_complete_startswith(Cache* cache, const char *prefix)
 {
     cache->complete(const char *prefix)->entries."""
-if get_type_definition(test, test.split("\n")[-1]) != (1, 58, 'Cache*', 'cache', '->complete()->entries.'):
+if get_type_definition(test) != (1, 58, 'Cache*', 'cache', '->complete()->entries.'):
     raise Exception("Couldn't parse type definition properly")
 
 test = """CacheCompletionResults* cache_complete_startswith(Cache* cache, const char *prefix)
 {
     cache->complete(const char *prefix)->entries[10]->"""
-if get_type_definition(test, test.split("\n")[-1]) != (1, 58, 'Cache*', 'cache', '->complete()->entries[]->'):
+if get_type_definition(test) != (1, 58, 'Cache*', 'cache', '->complete()->entries[]->'):
     raise Exception("Couldn't parse type definition properly")
 
 test = """bool Mesh::CopyToVBO ( UInt32 wantedChannels, VBO& vbo )
@@ -269,7 +269,7 @@ if make_template(data) != test:
 
 test = """Type[] generic = m.getGenericParameterTypes();
 generic."""
-if get_type_definition(test, test.split("\n")[-1]) != (1, 8, 'Type[]', 'generic', '.'):
+if get_type_definition(test) != (1, 8, 'Type[]', 'generic', '.'):
     raise Exception("Couldn't get type definition")
 
 test = """class Test
@@ -283,6 +283,37 @@ test = """class Test
                 public Either<Throwable, P2<Node, Rectangle2D.Double>> f( final RoadNew road, final P2<Node, Rectangle2D.Double> p ) {
                     if( Inclusive2DIntersectionVerifier.intersects( road, p._2() ) ) {
                         p."""
-if get_type_definition(test, test.split("\n")[-1]) != (9, 130, 'P2<Node, Rectangle2D.Double>', 'p', '.'):
+if get_type_definition(test) != (9, 130, 'P2<Node, Rectangle2D.Double>', 'p', '.'):
+    raise Exception("Couldn't get the type definition")
+
+test = """public class Tests {
+    public static void main( String[] args ) {
+        Foo<Foo<String, String>, String> foo = bar.f( "foo" );
+        Foo<Foo<String, String>, String> foo2 = bar.f( "foo2" );
+        System.out.println( foo.f( new Foo<String, String>() {
+            @Override
+            public String f( final String string ) {
+                return string;
+            }
+        }) ) ; // <--- if you type a . in this code (like this: }). ); ) you'll get an error
+        foo."""
+if get_type_definition(test) != (4, 42, 'Foo<Foo<String, String>, String>', 'foo', '.'):
+    raise Exception("Couldn't get the type definition")
+
+if make_template((u'Foo', [('java.lang.String', None), ('java.lang.String', None)])) != "Foo<java.lang.String, java.lang.String>":
+    raise Exception("Couldn't make template")
+
+
+test = """public class Tests {
+    public static void main( String[] args ) {
+        Foo<Foo<String, String>, String> foo = bar.f( "foo" );
+        Foo<Foo<String, String>, String> foo2 = bar.f( "foo2" );
+        System.out.println( foo.f( new Foo<String, String>() {
+            @Override
+            public String f( final String string ) {
+                return string;
+            }
+        })."""
+if get_type_definition(test) != (4, 42, 'Foo<Foo<String, String>, String>', 'foo', '.f().'):
     raise Exception("Couldn't get the type definition")
 print "all is well"
