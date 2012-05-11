@@ -34,7 +34,7 @@ def count_brackets(data):
 
 
 def collapse_brackets(before):
-    i = len(before)-1
+    i = len(before)
     count = 0
     end = -1
     min = 0
@@ -60,7 +60,7 @@ def collapse_brackets(before):
 
 
 def collapse_ltgt(before):
-    i = len(before)-1
+    i = len(before)
     count = 0
     end = -1
     while i >= 0:
@@ -89,7 +89,7 @@ def collapse_ltgt(before):
 
 
 def collapse_parenthesis(before):
-    i = len(before)-1
+    i = len(before)
     count = 0
     end = -1
     while i >= 0:
@@ -111,7 +111,7 @@ def collapse_parenthesis(before):
 
 
 def collapse_square_brackets(before):
-    i = len(before)-1
+    i = len(before)
     count = 0
     end = -1
     while i >= 0:
@@ -396,27 +396,22 @@ def template_split(data):
     if data == None:
         return None
     ret = []
-    comma = data.find(",")
-    pos = 0
-    start = 0
-    while comma != -1:
-        idx1 = data.find("<", pos)
-        idx2 = data.find(">", pos)
-        if (idx1 < comma and comma > idx2) or (idx1 > comma and comma < idx2):
-            ret.append(data[start:comma].strip())
-            pos = comma+1
-            start = pos+1
-        else:
-            pos = comma+1
+    origdata = data
+    data = collapse_ltgt(data)
+    data = [a.strip() for a in data.split(",")]
+    exp = ""
+    for var in data:
+        exp += "(%s)\\s*,?\\s*" % (re.escape(var).replace("\\<\\>", "<.*>").strip())
 
-        comma = data.find(",", pos)
-    ret.append(data[start:].strip())
+    match = re.search(exp, origdata)
+    ret = list(match.groups())
+
     return ret
 
 
 def solve_template(typename):
     args = []
-    template = re.search("([^<]+)(<(.+)>)?", typename)
+    template = re.search("([^<]+)(<(.+)>)?$", typename)
     args = template_split(template.group(3))
     if args:
         for i in range(len(args)):

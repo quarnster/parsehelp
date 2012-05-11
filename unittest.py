@@ -316,4 +316,18 @@ test = """public class Tests {
         })."""
 if get_type_definition(test) != (4, 42, 'Foo<Foo<String, String>, String>', 'foo', '.f().'):
     raise Exception("Couldn't get the type definition")
+
+test = """Foo<java.lang.String, Foo<Foo<java.lang.String, java.lang.String>, java.lang.String> >"""
+if solve_template(test) != ('Foo', [('java.lang.String', None), ('Foo', [('Foo', [('java.lang.String', None), ('java.lang.String', None)]), ('java.lang.String', None)])]):
+    raise Exception("Didn't solve template properly")
+
+if make_template(solve_template(test)) != test:
+    raise Exception("Didn't make template properly")
+
+test = """Tests.Tests$Foo<java.lang.String, Tests.Tests$Foo<Tests.Tests$Foo<java.lang.String, java.lang.String>, java.lang.String> >"""
+if solve_template(test) != ('Tests.Tests$Foo', [('java.lang.String', None), ('Tests.Tests$Foo', [('Tests.Tests$Foo', [('java.lang.String', None), ('java.lang.String', None)]), ('java.lang.String', None)])]):
+    raise Exception("Didn't solve template properly")
+
+if make_template(solve_template(test)) != test:
+    raise Exception("Didn't make template properly")
 print "all is well"
