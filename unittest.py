@@ -330,4 +330,11 @@ if solve_template(test) != ('Tests.Tests$Foo', [('java.lang.String', None), ('Te
 
 if make_template(solve_template(test)) != test:
     raise Exception("Didn't make template properly")
+
+test = """string[] argv = arg[0].Split(new string[] {sep},  StringSplitOptions.None);
+            foreach (string a in argv)
+            {
+                argv."""
+if get_type_definition(test) != (1, 10, 'string[]', 'argv', '.'):
+    raise Exception("Couldn't get the type definition")
 print "all is well"

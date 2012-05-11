@@ -145,7 +145,7 @@ def extract_completion(before):
         before = before[:-len(match.group(3))-len(match.group(5))].strip()
     return ret
 
-_keywords = ["return", "new", "delete", "class", "define", "using", "void", "template", "public:", "protected:", "private:", "public", "private", "protected", "typename"]
+_keywords = ["return", "new", "delete", "class", "define", "using", "void", "template", "public:", "protected:", "private:", "public", "private", "protected", "typename", "in"]
 
 
 def extract_used_namespaces(data):
