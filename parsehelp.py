@@ -70,8 +70,19 @@ def collapse_ltgt(before):
         if i == -1:
             break
         if before[i] == '>':
-            if i > 0 and (before[i-1] == '>' or before[i-1] == '-' or \
-                    (before[i-1] == ' ' and i >=2 and before[i-2] != '>')):
+            collapse = True
+            if i > 0 and before[i-1] == '>':
+                # Don't want to collapse a statement such as 'std::cout << "hello world!!" << std::endl;
+                data = before[:i-1]
+                match = re.search("([\\w\\s,.:<]+)$", data, re.MULTILINE)
+                if match:
+                    if match.group(1).count("<") < 2:
+                        collapse = False
+                else:
+                    collapse = False
+
+            if not collapse or before[i-1] == '-' or \
+                    (before[i-1] == ' ' and i >=2 and before[i-2] != '>'):
                 i -= 1
             else:
                 count += 1
