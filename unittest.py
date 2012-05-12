@@ -360,4 +360,19 @@ test = """Archive<T1, T2> a;
     a->"""
 if get_type_definition(test) != (1, 17, 'Archive<T1, T2>', 'a', '->'):
     raise Exception("Couldn't get the type definition")
+
+test = """import fj.*;
+import fj.data.fingertrees.*;
+import  java.awt.geom.Rectangle2D;
+import java.util.*;
+
+        @Override
+        public CityNew nearestCity( final Point2D p, final PriorityQueue<P2<Node, Rectangle2D.Double>> queue ) {
+            if( mPoints.isNotEmpty() ) {
+                return mPoints.index( 0 );
+            }
+            else {
+                queue."""
+if get_type_definition(test) != (7, 104, 'PriorityQueue<P2<Node, Rectangle2D.Double>>', 'queue', '.'):
+    raise Exception("Couldn't get the type definition")
 print "all is well"

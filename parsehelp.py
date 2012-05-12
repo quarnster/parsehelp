@@ -74,7 +74,7 @@ def collapse_ltgt(before):
             if i > 0 and before[i-1] == '>':
                 # Don't want to collapse a statement such as 'std::cout << "hello world!!" << std::endl;
                 data = before[:i-1]
-                match = re.search("([\\w\\s,.:<]+)$", data, re.MULTILINE)
+                match = re.search("([\\w\\s,.:<]+)$", data)
                 if match:
                     if match.group(1).count("<") < 2:
                         collapse = False
