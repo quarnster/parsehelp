@@ -375,4 +375,13 @@ import java.util.*;
                 queue."""
 if get_type_definition(test) != (7, 104, 'PriorityQueue<P2<Node, Rectangle2D.Double>>', 'queue', '.'):
     raise Exception("Couldn't get the type definition")
+
+test = """    private static String getInstancedType(Class<?> c, String gen, String ret, String[] templateParam)
+    {
+        if (gen.startsWith("class "))
+            gen = gen.substring("class ".length());
+        {
+            this."""
+if get_type_definition(test) != (-1, -1, None, 'this', '.'):
+    raise Exception("Couldn't get the type definition")
 print "all is well"

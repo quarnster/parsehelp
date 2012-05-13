@@ -121,6 +121,26 @@ def collapse_parenthesis(before):
     return before
 
 
+def collapse_strings(before):
+    i = len(before)
+    count = 0
+    end = -1
+    while i >= 0:
+        i = before.rfind("\"", 0, i)
+        if i == -1:
+            break
+        if before[i] == '\"':
+            if i > 0 and before[i-1] == '\\':
+                i -= 1
+            elif count > 0:
+                before = "%s%s" % (before[:i+1], before[end:])
+                count = 0
+            else:
+                count += 1
+                end = i
+    return before
+
+
 def collapse_square_brackets(before):
     i = len(before)
     count = 0
@@ -202,6 +222,7 @@ def extract_class_from_function(data):
 def extract_class(data):
     data = remove_preprocessing(data)
     data = collapse_brackets(data)
+    data = collapse_strings(data)
     data = remove_classes(data)
     regex = re.compile("class\s+([^;{\\s:]+)\\s*(:|;|\{|extends|implements)", re.MULTILINE)
     ret = None
