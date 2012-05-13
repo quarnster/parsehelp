@@ -159,6 +159,14 @@ def extract_completion(before):
 _keywords = ["return", "new", "delete", "class", "define", "using", "void", "template", "public:", "protected:", "private:", "public", "private", "protected", "typename", "in"]
 
 
+def extract_package(data):
+    data = remove_preprocessing(data)
+    match = re.search(r"package\s([\w.]+);", data)
+    if match:
+        return match.group(1)
+    return None
+
+
 def extract_used_namespaces(data):
     regex = re.compile("\s*using\s+(namespace\s+)?([^;]+)", re.MULTILINE)
     ret = []
