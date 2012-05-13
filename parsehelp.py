@@ -199,6 +199,7 @@ def extract_used_namespaces(data):
 
 
 def extract_namespace(data):
+    data = remove_preprocessing(data)
     data = collapse_brackets(data)
     data = remove_namespaces(data)
     regex = re.compile("namespace\s+([^{\s]+)\s*\{", re.MULTILINE)
