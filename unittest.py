@@ -384,4 +384,28 @@ test = """    private static String getInstancedType(Class<?> c, String gen, Str
             this."""
 if get_type_definition(test) != (-1, -1, None, 'this', '.'):
     raise Exception("Couldn't get the type definition")
+
+test = "System.Collections.Generic.Dictionary<System.String, System.String>.ValueCollection"
+if solve_template(test) != ('System.Collections.Generic.Dictionary', [('System.String', None), ('System.String', None)], ('ValueCollection', None)):
+    raise Exception("Couldn't solve the template")
+
+if make_template(solve_template(test)) != test:
+    raise Exception("Couldn't make the template")
+
+test = "std::vector<std::string>::iterator"
+if solve_template(test) != ('std::vector', [('std::string', None)], ('iterator', None)):
+    raise Exception("Couldn't solve the template")
+
+if make_template(solve_template(test), "::") != test:
+    raise Exception("Couldn't make the template")
+
+test = """Dictionary<string,string>.ValueCollection t;
+t."""
+if get_type_definition(test) != (1, 43, 'Dictionary<string,string>.ValueCollection', 't', '.'):
+    raise Exception("Couldn't get the type definition")
+
+test = """std::vector<int>::iterator i;
+i."""
+if get_type_definition(test) != (1, 28, 'std::vector<int>::iterator', 'i', '.'):
+    raise Exception("Couldn't get the type definition")
 print "all is well"

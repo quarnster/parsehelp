@@ -359,9 +359,10 @@ def get_var_type(data, var):
         match = m
     if match and match.group(1):
         key = get_base_type(match.group(1))
-        if key.endswith(">"):
-            name = match.group(1)[:match.group(1).find("<")]
-            regex = re.compile("(%s<.+>[\\s\*\&]+)(%s)" % (name, var))
+        if "<>" in key:
+            name = key[:key.find("<")]
+            end = key[key.find(">")+1:]
+            regex = re.compile(r"(%s<.+>%s[\s*&]+)(%s)" % (name, end, var))
             match = None
             for m in regex.finditer(origdata):
                 key = get_base_type(m.group(1))
@@ -452,7 +453,7 @@ def template_split(data):
 
 def solve_template(typename):
     args = []
-    template = re.search("([^<]+)(<(.+)>)?$", typename)
+    template = re.search(r"([^<]+)(<(.+)>)?((::|.)(.+))?$", typename)
     args = template_split(template.group(3))
     if args:
         for i in range(len(args)):
@@ -460,18 +461,23 @@ def solve_template(typename):
                 args[i] = solve_template(args[i])
             else:
                 args[i] = (args[i], None)
+    if template.group(6):
+        return template.group(1), args, solve_template(template.group(6))
     return template.group(1), args
 
 
-def make_template(data):
+def make_template(data, concat="."):
     if data[1] != None:
         ret = ""
         for param in data[1]:
-            sub = make_template(param)
+            sub = make_template(param, concat)
             if len(ret):
                 ret += ", "
             ret += sub
-        return "%s<%s%s>" % (data[0], ret, ' ' if ret[-1] == '>' else '')
+        temp = "%s<%s%s>" % (data[0], ret, ' ' if ret[-1] == '>' else '')
+        if len(data) == 3:
+            temp += concat + make_template(data[2], concat)
+        return temp
     return data[0]
 
 
