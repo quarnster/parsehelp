@@ -408,4 +408,11 @@ test = """std::vector<int>::iterator i;
 i."""
 if get_type_definition(test) != (1, 28, 'std::vector<int>::iterator', 'i', '.'):
     raise Exception("Couldn't get the type definition")
+
+test = """struct hostent *server = gethostbyname("localhost");"""
+if extract_variables(test) != [('struct hostent *', 'server')]:
+    raise Exception("Couldn't get the type definition")
+
+if get_base_type("struct hostent *") != "hostent":
+    raise Exception("Didn't properly get the base type")
 print "all is well"

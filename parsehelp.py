@@ -301,7 +301,7 @@ def extract_variables(data):
     data = re.sub("\([^)]*?\)\\s*;", "()", data, re.MULTILINE)
 
     endpattern = "\;|,|\)|=|\["
-    pattern = "(^\\s*|,|\()\\s*(\\b[^%s]+[\\s*&]+(const)?[\\s*&]*)(\\b[^%s\[\>]+)\\s*(?=%s)" % (_invalid, _invalid, endpattern)
+    pattern = "(^\\s*|,|\()\\s*((struct\s*)?\\b[^%s]+[\\s*&]+(const)?[\\s*&]*)(\\b[^%s\[\>]+)\\s*(?=%s)" % (_invalid, _invalid, endpattern)
     regex = re.compile(pattern, re.MULTILINE)
     regex2 = re.compile("[^)]+\)+\s+\{")
     ret = []
@@ -309,14 +309,14 @@ def extract_variables(data):
         type = get_base_type(m.group(2))
         if type in _keywords or type.startswith("template"):
             continue
-        pat = "%s\\s*%s\\s*(%s)" % (m.group(2).replace("*", "\\*"), m.group(4), endpattern)
+        pat = "%s\\s*%s\\s*(%s)" % (m.group(2).replace("*", "\\*"), m.group(5), endpattern)
         end = re.search(pat, data)
         if end.group(1) == "(":
             # Remove the declaration if it's inside of a () {}?
             left = data[end.end():]
             if regex.match(left) or regex2.match(left, re.MULTILINE):
                 continue
-        var = m.group(4).strip()
+        var = m.group(5).strip()
         type = m.group(2).strip()
         if end.group(1) == "[":
             type += re.search("([\\[\\]]+)", data[end.start():]).group(1)
@@ -334,8 +334,9 @@ def extract_variables(data):
 
 
 def get_base_type(data):
-    data = re.sub("\s*const\s*", "", data)
-    data = re.sub("\s*static\s*", "", data)
+    data = re.sub(r"\s*const\s*", "", data)
+    data = re.sub(r"\s*static\s*", "", data)
+    data = re.sub(r"\s*struct\s*", "", data)
     data = data.strip()
     data = data.replace("&", "").replace("*", "").replace("[]", "")
     data = data.strip()
