@@ -74,7 +74,7 @@ def collapse_ltgt(before):
             if i > 0 and before[i-1] == '>':
                 # Don't want to collapse a statement such as 'std::cout << "hello world!!" << std::endl;
                 data = before[:i-1]
-                match = re.search("([\\w\\s,.:<]+)$", data)
+                match = re.search(r"([\w\s,.:<]+)$", data)
                 if match:
                     if match.group(1).count("<") < 2:
                         collapse = False
@@ -169,7 +169,7 @@ def extract_completion(before):
     before = before.split("\n")[-1]
     ret = ""
     while True:
-        match = re.search("((\.|\->)?([^|.,\ \[\]\(\)\t]+(\(\)|\[\])*)(\.|\->))$", before)
+        match = re.search(r"((\.|\->)?([^|.,\ \[\]\(\)\t]+(\(\)|\[\])*)(\.|\->))$", before)
         if not match:
             break
         ret = match.group(3) + match.group(5) + ret
@@ -188,7 +188,7 @@ def extract_package(data):
 
 
 def extract_used_namespaces(data):
-    regex = re.compile("\s*using\s+(namespace\s+)?([^;]+)", re.MULTILINE)
+    regex = re.compile(r"\s*using\s+(namespace\s+)?([^;]+)", re.MULTILINE)
     ret = []
     for match in regex.finditer(data):
         toadd = match.group(2)
@@ -202,7 +202,7 @@ def extract_namespace(data):
     data = remove_preprocessing(data)
     data = collapse_brackets(data)
     data = remove_namespaces(data)
-    regex = re.compile("namespace\s+([^{\s]+)\s*\{", re.MULTILINE)
+    regex = re.compile(r"namespace\s+([^{\s]+)\s*\{", re.MULTILINE)
     ret = ""
     for match in regex.finditer(data):
         if len(ret):
@@ -217,7 +217,7 @@ def extract_class_from_function(data):
     data = collapse_brackets(data)
     data = remove_functions(data)
     ret = None
-    for match in re.finditer("(.*?)(\w+)::~?(\w+)\\s*\([^)]*\)\s*(const)?\s*\{", data, re.MULTILINE):
+    for match in re.finditer(r"(.*?)(\w+)::~?(\w+)\s*\([^)]*\)\s*(const)?\s*\{", data, re.MULTILINE):
         ret = match.group(2)
     return ret
 
@@ -227,7 +227,7 @@ def extract_class(data):
     data = collapse_brackets(data)
     data = collapse_strings(data)
     data = remove_classes(data)
-    regex = re.compile("class\s+([^;{\\s:]+)\\s*(:|;|\{|extends|implements)", re.MULTILINE)
+    regex = re.compile(r"class\s+([^;{\s:]+)\s*(:|;|\{|extends|implements)", re.MULTILINE)
     ret = None
     for match in regex.finditer(data):
         ret = match.group(1)
@@ -238,7 +238,7 @@ def extract_inheritance(data, classname):
     data = remove_preprocessing(data)
     data = collapse_brackets(data)
     data = remove_classes(data)
-    regex = re.compile("class\s+%s\\s*(:|extends)\\s+([^\\s,\{]+)" % classname, re.MULTILINE)
+    regex = re.compile(r"class\s+%s\s*(:|extends)\s+([^\s,{]+)" % classname, re.MULTILINE)
     match = regex.search(data)
     if match != None:
         return match.group(2)
@@ -246,17 +246,17 @@ def extract_inheritance(data, classname):
 
 
 def remove_classes(data):
-    regex = re.compile("class\s+[^{]+{\}\s*;?", re.MULTILINE)
+    regex = re.compile(r"class\s+[^{]+{\}\s*;?", re.MULTILINE)
     return regex.sub("", data)
 
 
 def remove_functions(data):
-    regex = re.compile("\S+\s*\([^\)]*\)\s*(const)?\s*\{\}", re.MULTILINE)
+    regex = re.compile(r"\S+\s*\([^\)]*\)\s*(const)?\s*\{\}", re.MULTILINE)
     return regex.sub("", data)
 
 
 def remove_namespaces(data):
-    regex = re.compile("\s*namespace\s+[^{]+\s*\{\}\s*", re.MULTILINE)
+    regex = re.compile(r"\s*namespace\s+[^{]+\s*\{\}\s*", re.MULTILINE)
     return regex.sub("", data)
 
 
@@ -272,15 +272,15 @@ def sub(exp, data):
 
 def remove_preprocessing(data):
     data = data.replace("\\\n", " ")
-    data = sub("\#\s*define[^\n]+\\n", data)
-    data = sub("\#\s*(ifndef|ifdef|if|endif|else|elif|pragma|include)[^\\n]*\\n", data)
-    data = sub("//[^\n]+\\n", data)
-    data = sub("/\\*.*?\\*/", data)
+    data = sub(r"\#\s*define[^\n]+\n", data)
+    data = sub(r"\#\s*(ifndef|ifdef|if|endif|else|elif|pragma|include)[^\n]*\n", data)
+    data = sub(r"//[^\n]+\n", data)
+    data = sub(r"/\*.*?\*/", data)
     return data
 
 
 def remove_includes(data):
-    regex = re.compile("""\#\s*include\s+(<|")[^>"]+(>|")""")
+    regex = re.compile(r"""\#\s*include\s+(<|")[^>"]+(>|")""")
     while True:
         old = data
         data = regex.sub("", data)
@@ -288,7 +288,31 @@ def remove_includes(data):
             break
     return data
 
-_invalid = """\\(\\s\\{,\\*\\&\\-\\+\\/;=%\)\"!"""
+_invalid = r"""\(\s\{,\*\&\-\+\/;=%\)\"!"""
+_endpattern = r"\;|,|\)|=|\["
+
+
+def patch_up_variable(origdata, data, type, var, ret):
+    var = re.sub(r"\s*=\s*[^;,\)]+", "", var)
+    for var in var.split(","):
+        var = var.strip()
+        pat = r"%s\s*([^;{]*)%s\s*(%s)" % (re.escape(type), re.escape(var), _endpattern)
+        end = re.search(pat, data)
+        if end.group(2) == "[":
+            type += re.search(r"([\[\]]+)", data[end.start():]).group(1)
+        i = var.find("[]")
+        if i != -1:
+            type += var[i:]
+            var = var[:i]
+        if "<" in type and ">" in type:
+            s = r"\b(%s.+%s)(const)?[\s*&]*(%s)" % (type[:type.find("<")+1], type[type.find(">"):], var)
+            regex = re.compile(s)
+            match = None
+            for m in regex.finditer(origdata):
+                match = m
+            type = match.group(1)
+
+        ret.append((type, var))
 
 
 def extract_variables(data):
@@ -300,38 +324,33 @@ def extract_variables(data):
     data = remove_functions(data)
     data = remove_namespaces(data)
     data = remove_classes(data)
-    data = re.sub("\([^)]*?\)\\s*;", "()", data, re.MULTILINE)
+    data = re.sub(r"\([^)]*?\)\s*;", "()", data, re.MULTILINE)
 
-    endpattern = "\;|,|\)|=|\["
-    pattern = "(^\\s*|,|\()\\s*((struct\s*)?\\b[^%s]+[\\s*&]+(const)?[\\s*&]*)(\\b[^%s\[\>]+)\\s*(?=%s)" % (_invalid, _invalid, endpattern)
-    regex = re.compile(pattern, re.MULTILINE)
-    regex2 = re.compile("[^)]+\)+\s+\{")
+    # first get any variables inside of the function declaration
+    funcdata = ";".join(re.findall(r"\(([^)]+\))", data, re.MULTILINE))
+    pattern = r"\s*((struct\s*)?\b[^%s]+[\s*&]+(const)?[\s*&]*)(\b[^%s]+)\s*(?=,|\)|=)" % (_invalid, _invalid)
+    funcvars = re.findall(pattern, funcdata, re.MULTILINE)
     ret = []
+    for m in funcvars:
+        type = get_base_type(m[0])
+        if type in _keywords:
+            continue
+        patch_up_variable(origdata, data, m[0].strip(), m[3].strip(), ret)
+
+    # Next, take care of all other variables
+    data = re.sub(r"\([^)]*\)", "()", data, re.MULTILINE)
+
+    pattern = r"(^\s*|,|\()\s*((struct\s*)?\b[^%s]+[\s*&]+(const)?[\s*&]*)(\b[^;()]+)\s*(?=%s)" % (_invalid, _endpattern)
+    regex = re.compile(pattern, re.MULTILINE)
+
     for m in regex.finditer(data):
         type = get_base_type(m.group(2))
-        if type in _keywords or type.startswith("template"):
+        if type in _keywords:
             continue
-        pat = "%s\\s*%s\\s*(%s)" % (m.group(2).replace("*", "\\*"), m.group(5), endpattern)
-        end = re.search(pat, data)
-        if end.group(1) == "(":
-            # Remove the declaration if it's inside of a () {}?
-            left = data[end.end():]
-            if regex.match(left) or regex2.match(left, re.MULTILINE):
-                continue
-        var = m.group(5).strip()
         type = m.group(2).strip()
-        if end.group(1) == "[":
-            type += re.search("([\\[\\]]+)", data[end.start():]).group(1)
-        if var != None:
-            if "<" in type and ">" in type:
-                s = "\\b(%s.+%s)(const)?[ \\t*&]*(%s)" % (type[:type.find("<")+1], type[type.find(">"):], var)
-                regex = re.compile(s)
-                match = None
-                for m in regex.finditer(origdata):
-                    match = m
-                type = match.group(1)
+        var = m.group(5).strip()
+        patch_up_variable(origdata, data, type, var, ret)
 
-            ret.append((type, var))
     return ret
 
 
@@ -346,7 +365,7 @@ def get_base_type(data):
 
 
 def get_var_type(data, var):
-    regex = re.compile("\\b([^%s]+[ \s\*\&]+)(%s)\s*(\[|\(|\;|,|\)|=|:|in\s+)" % (_invalid, var))
+    regex = re.compile(r"\b([^%s]+[ \s\*\&]+)(\s*[^%s]+\,\s*)*(%s)\s*(\[|\(|\;|,|\)|=|:|in\s+)" % (_invalid, _invalid, var))
 
     origdata = data
     data = remove_preprocessing(data)
@@ -389,26 +408,26 @@ def get_var_type(data, var):
                         if count == 0:
                             data = data[i:]
                             break
-                regex = re.compile("(%s%s)(%s)" % (name, data, var))
+                regex = re.compile(r"(%s%s)([^%s],)*(%s)" % (name, data, _invalid, var))
                 for m in regex.finditer(origdata):
                     match = m
 
     if match and match.group(1):
         # Just so that it reports the correct location in the file
-        regex = re.compile("(%s)(%s)(\(|\;|,|\)|=)" % (re.escape(match.group(1)), re.escape(match.group(2))))
+        regex = re.compile(r"(%s)([^%s],)*(%s)(\(|\;|,|\)|=)" % (re.escape(match.group(1)), _invalid, re.escape(match.group(3))))
         for m in regex.finditer(origdata):
             match = m
     return match
 
 
 def remove_empty_classes(data):
-    data = sub("\s*class\s+[^\{]+\s*\{\}", data)
+    data = sub(r"\s*class\s+[^\{]+\s*\{\}", data)
     return data
 
 
 def get_type_definition(data):
     before = extract_completion(data)
-    match = re.search("([^\.\-:]+)[^\.\-:]*(\.|->|::)(.*)", before)
+    match = re.search(r"([^\.\-:]+)[^\.\-:]*(\.|->|::)(.*)", before)
     var = match.group(1)
     extra = ""
     if var.endswith("[]"):
@@ -431,8 +450,8 @@ def get_type_definition(data):
         match = get_var_type(data, var)
     if match == None:
         return -1, -1, var, None, tocomplete
-    line = data[:match.start(2)].count("\n") + 1
-    column = len(data[:match.start(2)].split("\n")[-1])+1
+    line = data[:match.start(3)].count("\n") + 1
+    column = len(data[:match.start(3)].split("\n")[-1])+1
     typename = match.group(1).strip()
     return line, column, typename+extra, var, tocomplete
 
@@ -446,7 +465,7 @@ def template_split(data):
     data = [a.strip() for a in data.split(",")]
     exp = ""
     for var in data:
-        exp += "(%s)\\s*,?\\s*" % (re.escape(var).replace("\\<\\>", "<.*>").strip())
+        exp += r"(%s)\s*,?\s*" % (re.escape(var).replace("\\<\\>", "<.*>").strip())
 
     match = re.search(exp, origdata)
     ret = list(match.groups())
@@ -498,10 +517,10 @@ def extract_word_at_offset(data, offset):
     line = extract_line_at_offset(data, offset)
     begin = 0
     end = 0
-    match = re.search("\\b\w*$", line[0:column-1])
+    match = re.search(r"\b\w*$", line[0:column-1])
     if match:
         begin = match.start()
-    match = re.search("^\w*", line[begin:])
+    match = re.search(r"^\w*", line[begin:])
     if match:
         end = begin+match.end()
     word = line[begin:end]
@@ -511,7 +530,7 @@ def extract_word_at_offset(data, offset):
 def extract_extended_word_at_offset(data, offset):
     line, column = get_line_and_column_from_offset(data, offset)
     line = extract_line_at_offset(data, offset)
-    match = re.search("^\w*", line[column:])
+    match = re.search(r"^\w*", line[column:])
     if match:
         column = column + match.end()
     extword = line[0:column]

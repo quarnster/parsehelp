@@ -49,7 +49,7 @@ match = get_var_type(test, "t1")
 if match == None or match.group(1).strip() != "Type&":
     raise Exception("Couldn't extract type properly: %s" % (match.group(1) if match else "None"))
 
-if extract_variables(test) != [('int', 'itShouldPickupThis'), ('Type&', 't1'), ('vector<Type2> &', 't2')]:
+if extract_variables(test) != [('Type&', 't1'), ('vector<Type2> &', 't2'), ('int', 'itShouldPickupThis')]:
     raise Exception("Didn't extract variables correctly")
 
 test = """Properties prop = new Properties();
@@ -454,4 +454,29 @@ namespace one
             """
 if extract_namespace(test) != "one::three":
     raise Exception("Wrong namespace")
+
+test = """
+    Parcel data, reply, moredata, test;
+    int a, b, c;
+    reply."""
+if get_type_definition(test) != (2, 18, 'Parcel', 'reply', '.'):
+    raise Exception("Couldn't get the type definition")
+
+test = """
+    Parcel data, reply, moredata, test;
+    int a, b, c;
+    moredata."""
+if get_type_definition(test) != (2, 25, 'Parcel', 'moredata', '.'):
+    raise Exception("Couldn't get the type definition")
+
+test = """
+    Parcel data, reply, moredata, test;
+    int a = 1, b = 2, c = 3;
+    test."""
+if get_type_definition(test) != (2, 35, 'Parcel', 'test', '.'):
+    raise Exception("Couldn't get the type definition")
+
+if extract_variables(test) != [('Parcel', 'data'), ('Parcel', 'reply'), ('Parcel', 'moredata'), ('Parcel', 'test'), ('int', 'a'), ('int', 'b'), ('int', 'c')]:
+    raise Exception("Couldn't extract variables properly")
+
 print "all is well"
