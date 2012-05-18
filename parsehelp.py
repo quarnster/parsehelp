@@ -208,6 +208,8 @@ def extract_namespace(data):
         if len(ret):
             ret += "::"
         ret += match.group(1)
+    if len(ret.strip()) == 0:
+        ret = None
     return ret
 
 
@@ -254,7 +256,7 @@ def remove_functions(data):
 
 
 def remove_namespaces(data):
-    regex = re.compile("\s*namespace\s+[^{]+\s*\{\}\s*;", re.MULTILINE)
+    regex = re.compile("\s*namespace\s+[^{]+\s*\{\}\s*", re.MULTILINE)
     return regex.sub("", data)
 
 

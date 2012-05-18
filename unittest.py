@@ -415,4 +415,43 @@ if extract_variables(test) != [('struct hostent *', 'server')]:
 
 if get_base_type("struct hostent *") != "hostent":
     raise Exception("Didn't properly get the base type")
+
+test = """
+namespace arne
+{
+    class C
+    {
+
+        arne::
+    };
+    class A {};
+    class B {};
+
+}
+using namespace android;
+int getFrames()
+{
+    """
+if extract_namespace(test) != None:
+    raise Exception("Namespace isn't None")
+
+if extract_used_namespaces(test) != ["android"]:
+    raise Exception("Wrong namespace")
+
+test = """
+namespace one
+{
+
+    namespace two
+    {
+        class A {};
+    }
+
+    namespace three
+    {
+        class B
+        {
+            """
+if extract_namespace(test) != "one::three":
+    raise Exception("Wrong namespace")
 print "all is well"
