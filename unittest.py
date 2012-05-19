@@ -479,4 +479,15 @@ if get_type_definition(test) != (2, 35, 'Parcel', 'test', '.'):
 if extract_variables(test) != [('Parcel', 'data'), ('Parcel', 'reply'), ('Parcel', 'moredata'), ('Parcel', 'test'), ('int', 'a'), ('int', 'b'), ('int', 'c')]:
     raise Exception("Couldn't extract variables properly")
 
+test = """    NamespaceFinder(CXCursor base, const char ** ns, unsigned int nsLength)
+    : mBase(base), namespaces(ns), namespaceCount(nsLength)
+    {
+
+    }
+    virtual void execute()
+    {
+
+"""
+if extract_variables(test) != []:
+    raise Exception("Couldn't extract variables properly")
 print "all is well"
