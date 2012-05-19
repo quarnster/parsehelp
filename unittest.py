@@ -496,4 +496,21 @@ test = """void OpenGLRenderer::Render(RenderNode* node)
     this->"""
 if get_type_definition(test) != (-1, -1, 'OpenGLRenderer', 'this', '->'):
     raise Exception("Couldn't get the type definition")
+
+test = """    const SmartPointer<Attribute> &index = node->GetMesh()->GetAttribute(mIndexID);
+    index."""
+if extract_variables(test) != [('const SmartPointer<Attribute> &', 'index')]:
+    raise Exception("Couldn't extract variables properly")
+
+if get_type_definition(test) != (1, 36, 'const SmartPointer<Attribute> &', 'index', '.'):
+    raise Exception("Couldn't get the type definition")
+
+test = """void something(const SmartPointer<Attribute> &index) {
+    index."""
+if extract_variables(test) != [('const SmartPointer<Attribute> &', 'index')]:
+    raise Exception("Couldn't extract variables properly")
+
+if get_type_definition(test) != (1, 47, 'const SmartPointer<Attribute> &', 'index', '.'):
+    raise Exception("Couldn't get the type definition")
+
 print "all is well"

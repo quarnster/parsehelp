@@ -328,19 +328,19 @@ def extract_variables(data):
 
     # first get any variables inside of the function declaration
     funcdata = ";".join(re.findall(r"\(([^)]+\))", data, re.MULTILINE))
-    pattern = r"\s*((struct\s*)?\b[^%s]+[\s*&]+(const)?[\s*&]*)(\b[^%s]+)\s*(?=,|\)|=)" % (_invalid, _invalid)
+    pattern = r"\s*((struct\s*)?\b(const\s*)?[^%s]+[\s*&]+(const)?[\s*&]*)(\b[^%s]+)\s*(?=,|\)|=)" % (_invalid, _invalid)
     funcvars = re.findall(pattern, funcdata, re.MULTILINE)
     ret = []
     for m in funcvars:
         type = get_base_type(m[0])
         if type in _keywords:
             continue
-        patch_up_variable(origdata, data, m[0].strip(), m[3].strip(), ret)
+        patch_up_variable(origdata, data, m[0].strip(), m[4].strip(), ret)
 
     # Next, take care of all other variables
     data = re.sub(r"\([^)]*\)", "()", data, re.MULTILINE)
 
-    pattern = r"(^\s*|,|\()\s*((struct\s*)?\b[^%s]+[\s*&]+(const)?[\s*&]*)(\b[^;()]+)\s*(?=%s)" % (_invalid, _endpattern)
+    pattern = r"(^\s*|,|\()\s*((struct\s*)?\b(const\s*)?\b[^%s]+[\s*&]+(const)?[\s*&]*)(\b[^;()]+)\s*(?=%s)" % (_invalid, _endpattern)
     regex = re.compile(pattern, re.MULTILINE)
 
     for m in regex.finditer(data):
@@ -348,7 +348,7 @@ def extract_variables(data):
         if type in _keywords:
             continue
         type = m.group(2).strip()
-        var = m.group(5).strip()
+        var = m.group(6).strip()
         patch_up_variable(origdata, data, type, var, ret)
 
     return ret
@@ -369,8 +369,7 @@ def get_base_type(data):
 
 
 def get_var_type(data, var):
-    regex = re.compile(r"\b([^%s]+[ \s\*\&]+)(\s*[^%s]+\,\s*)*(%s)\s*(\[|\(|\;|,|\)|=|:|in\s+)" % (_invalid, _invalid, var))
-
+    regex = re.compile(r"(const\s*)?\b([^%s]+[ \s\*\&]+)(\s*[^%s]+\,\s*)*(%s)\s*(\[|\(|\;|,|\)|=|:|in\s+)" % (_invalid, _invalid, var), re.MULTILINE)
     origdata = data
     data = remove_preprocessing(data)
     data = collapse_ltgt(data)
@@ -379,16 +378,24 @@ def get_var_type(data, var):
     match = None
 
     for m in regex.finditer(data):
-        t = m.group(1).strip()
+        t = m.group(2).strip()
         if t in _keywords:
             continue
         match = m
-    if match and match.group(1):
+    if match and match.group(2):
+        type = match.group(2)
+        if match.group(1):
+            type = match.group(1) + type
+        pat = r"(%s)([^%s]+,\s*)*(%s)" % (re.escape(type), _invalid, re.escape(match.group(4)))
+        regex = re.compile(pat)
+        for m in regex.finditer(data):
+            match = m
         key = get_base_type(match.group(1))
         if "<>" in key:
+            key = match.group(1)
             name = key[:key.find("<")]
             end = key[key.find(">")+1:]
-            regex = re.compile(r"(%s<.+>%s[\s*&]+)(%s)" % (name, end, var))
+            regex = re.compile(r"(%s<.+>%s\s*)(%s)" % (name, end, var))
             match = None
             for m in regex.finditer(origdata):
                 key = get_base_type(m.group(1))
@@ -412,13 +419,16 @@ def get_var_type(data, var):
                         if count == 0:
                             data = data[i:]
                             break
-                regex = re.compile(r"(%s%s)([^%s],)*(%s)" % (name, data, _invalid, var))
+                regex = re.compile(r"(%s%s)([^%s]+,\s*)*(%s)" % (name, data, _invalid, var))
                 for m in regex.finditer(origdata):
                     match = m
+    else:
+        match = None
 
     if match and match.group(1):
         # Just so that it reports the correct location in the file
-        regex = re.compile(r"(%s)([^%s],)*(%s)(\(|\;|,|\)|=)" % (re.escape(match.group(1)), _invalid, re.escape(match.group(3))))
+        pat = r"(%s)([^%s],)*(%s)(\(|\;|,|\)|=)" % (re.escape(match.group(1)), _invalid, re.escape(match.group(3)))
+        regex = re.compile(pat)
         for m in regex.finditer(origdata):
             match = m
     return match
