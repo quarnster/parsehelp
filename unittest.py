@@ -513,4 +513,9 @@ if extract_variables(test) != [('const SmartPointer<Attribute> &', 'index')]:
 if get_type_definition(test) != (1, 47, 'const SmartPointer<Attribute> &', 'index', '.'):
     raise Exception("Couldn't get the type definition")
 
+test = """        std::vector<Entity*> t;
+        t."""
+if get_type_definition(test) != (1, 30, 'std::vector<Entity*>', 't', '.'):
+    raise Exception("Couldn't get the type definition")
+
 print "all is well"

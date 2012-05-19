@@ -395,7 +395,7 @@ def get_var_type(data, var):
             key = match.group(1)
             name = key[:key.find("<")]
             end = key[key.find(">")+1:]
-            regex = re.compile(r"(%s<.+>%s\s*)(%s)" % (name, end, var))
+            regex = re.compile(r"(%s<.+>%s\s*)([^%s]+,\s*)*(%s)" % (name, end, _invalid, var))
             match = None
             for m in regex.finditer(origdata):
                 key = get_base_type(m.group(1))
