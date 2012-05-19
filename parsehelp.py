@@ -354,6 +354,10 @@ def extract_variables(data):
     return ret
 
 
+def is_pointer(typename):
+    return "*" in typename or "[]" in typename
+
+
 def get_base_type(data):
     data = re.sub(r"\s*const\s*", "", data)
     data = re.sub(r"\s*static\s*", "", data)
@@ -437,6 +441,8 @@ def get_type_definition(data):
 
     if var == "this":
         clazz = extract_class(data)
+        if clazz == None:
+            clazz = extract_class_from_function(data)
         line = column = -1  # TODO
         return line, column, clazz, var, tocomplete
     elif var == "super":

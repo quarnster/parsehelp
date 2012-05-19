@@ -490,4 +490,10 @@ test = """    NamespaceFinder(CXCursor base, const char ** ns, unsigned int nsLe
 """
 if extract_variables(test) != []:
     raise Exception("Couldn't extract variables properly")
+
+test = """void OpenGLRenderer::Render(RenderNode* node)
+{
+    this->"""
+if get_type_definition(test) != (-1, -1, 'OpenGLRenderer', 'this', '->'):
+    raise Exception("Couldn't get the type definition")
 print "all is well"
