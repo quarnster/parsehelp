@@ -523,4 +523,25 @@ normal."""
 if extract_variables(test) != [('Vector3', 'normal')]:
     raise Exception("Couldn't extract variables properly")
 
+test = """Vector3 pos(camera->GetWorldTransform().getOrigin());"""
+if extract_variables(test) != [('Vector3', 'pos')]:
+    raise Exception("Couldn't extract variables properly")
+
+test = """
+            const Property prop = node->GetProperty(a.GetName());
+            if (!prop.IsNull())
+            {
+                switch (prop.GetType())
+                {
+                    case Property::FLOAT: glUniform1f(a.GetId(), prop.GetFloat()); break;
+                    case Property::RESOURCE:
+                    {
+                        const GLTexture *tex = (GLTexture*) prop.GetResource();"""
+if extract_variables(test) != [('const Property', 'prop'), ('const GLTexture *', 'tex')]:
+    raise Exception("Couldn't extract variables properly")
+
+test = """default: int test;"""
+if extract_variables(test) != [('int', 'test')]:
+    raise Exception("Couldn't extract variables properly")
+
 print "all is well"

@@ -33,22 +33,22 @@ def count_brackets(data):
     return even
 
 
-def collapse_brackets(before):
+def collapse_generic(before, open, close):
     i = len(before)
     count = 0
     end = -1
     min = 0
     while i >= 0:
-        a = before.rfind("}", 0, i)
-        b = before.rfind("{", 0, i)
+        a = before.rfind(open, 0, i)
+        b = before.rfind(close, 0, i)
         i = max(a, b)
         if i == -1:
             break
-        if before[i] == '}':
+        if before[i] == close:
             count += 1
             if end == -1:
                 end = i
-        elif before[i] == '{':
+        elif before[i] == open:
             count -= 1
             if count < min:
                 min = count
@@ -59,10 +59,23 @@ def collapse_brackets(before):
     return before
 
 
+def collapse_brackets(before):
+    return collapse_generic(before, "{", "}")
+
+
+def collapse_parenthesis(before):
+    return collapse_generic(before, '(', ')')
+
+
+def collapse_square_brackets(before):
+    return collapse_generic(before, '[', ']')
+
+
 def collapse_ltgt(before):
     i = len(before)
     count = 0
     end = -1
+    min = 0
     while i >= 0:
         a = before.rfind(">", 0, i)
         b = before.rfind("<", 0, i)
@@ -93,31 +106,11 @@ def collapse_ltgt(before):
                 i -= 1
             else:
                 count -= 1
-                if count == 0 and end != -1:
+                if count == min and end != -1:
                     before = "%s%s" % (before[:i+1], before[end:])
                     end = -1
-    return before
-
-
-def collapse_parenthesis(before):
-    i = len(before)
-    count = 0
-    end = -1
-    while i >= 0:
-        a = before.rfind("(", 0, i)
-        b = before.rfind(")", 0, i)
-        i = max(a, b)
-        if i == -1:
-            break
-        if before[i] == ')':
-            count += 1
-            if end == -1:
-                end = i
-        elif before[i] == '(':
-            count -= 1
-            if count == 0 and end != -1:
-                before = "%s%s" % (before[:i+1], before[end:])
-                end = -1
+                if count < min:
+                    min = count
     return before
 
 
@@ -141,28 +134,6 @@ def collapse_strings(before):
     return before
 
 
-def collapse_square_brackets(before):
-    i = len(before)
-    count = 0
-    end = -1
-    while i >= 0:
-        a = before.rfind("[", 0, i)
-        b = before.rfind("]", 0, i)
-        i = max(a, b)
-        if i == -1:
-            break
-        if before[i] == ']':
-            count += 1
-            if end == -1:
-                end = i
-        elif before[i] == '[':
-            count -= 1
-            if count == 0 and end != -1:
-                before = "%s%s" % (before[:i+1], before[end:])
-                end = -1
-    return before
-
-
 def extract_completion(before):
     before = collapse_parenthesis(before)
     before = collapse_square_brackets(before)
@@ -176,7 +147,7 @@ def extract_completion(before):
         before = before[:-len(match.group(3))-len(match.group(5))].strip()
     return ret
 
-_keywords = ["return", "new", "delete", "class", "define", "using", "void", "template", "public:", "protected:", "private:", "public", "private", "protected", "typename", "in"]
+_keywords = ["return", "new", "delete", "class", "define", "using", "void", "template", "public:", "protected:", "private:", "public", "private", "protected", "typename", "in", "case", "default", "goto"]
 
 
 def extract_package(data):
@@ -289,7 +260,7 @@ def remove_includes(data):
     return data
 
 _invalid = r"""\(\s\{,\*\&\-\+\/;=%\)\"!"""
-_endpattern = r"\;|,|\)|=|\[|\(\)\s*\;"
+_endpattern = r"\;|,|\)|=|\[|\(\)\s*\;|:\s+"
 
 
 def patch_up_variable(origdata, data, type, var, ret):
@@ -325,6 +296,8 @@ def extract_variables(data):
     data = remove_namespaces(data)
     data = remove_classes(data)
     data = re.sub(r"\([^)]*?\)\s*(?=;)", "()", data, re.MULTILINE)
+    data = re.sub(r"\s*case\s+([\w]+(::)?)+:", "", data, re.MULTILINE)
+    data = re.sub(r"\s*default:\s*", "", data, re.MULTILINE)
 
     # first get any variables inside of the function declaration
     funcdata = ";".join(re.findall(r"\(([^)]+\))", data, re.MULTILINE))
@@ -338,7 +311,7 @@ def extract_variables(data):
         patch_up_variable(origdata, data, m[0].strip(), m[4].strip(), ret)
 
     # Next, take care of all other variables
-    data = re.sub(r"\([^)]*\)", "()", data, re.MULTILINE)
+    data = collapse_parenthesis(data)
 
     pattern = r"(^\s*|,|\()\s*((struct\s*)?\b(const\s*)?\b[^%s]+[\s*&]+(const)?[\s*&]*)(\b[^;()]+)\s*(?=%s)" % (_invalid, _endpattern)
     regex = re.compile(pattern, re.MULTILINE)
