@@ -551,4 +551,12 @@ test = """BOOST_FOREACH(const Stacktrace* s, list)
     s."""
 if get_type_definition(test) != (-1, -1, 's', None, '.'):
     raise Exception("Got a type definition when it shouldn't have")
+
+test = """Call::Call(const char *name, Call* parent, int callDepth)
+: mName(name), mOverhead(0), mTotalTime(0), mChildTime(0), mCallCount(0), mParent(parent), mCallDepth(callDepth)
+{
+    """
+if extract_class_from_function(test) != "Call":
+    raise Exception("Failed to extract class")
+
 print "all is well"

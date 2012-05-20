@@ -188,7 +188,7 @@ def extract_class_from_function(data):
     data = collapse_brackets(data)
     data = remove_functions(data)
     ret = None
-    for match in re.finditer(r"(.*?)(\w+)::~?(\w+)\s*\([^)]*\)\s*(const)?\s*\{", data, re.MULTILINE):
+    for match in re.finditer(r"(.*?)(\w+)::~?(\w+)\s*\([^);{}]*\)\s*(const)?[^{};]*\s*\{", data, re.MULTILINE):
         ret = match.group(2)
     return ret
 
