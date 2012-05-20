@@ -544,4 +544,11 @@ test = """default: int test;"""
 if extract_variables(test) != [('int', 'test')]:
     raise Exception("Couldn't extract variables properly")
 
+test = """BOOST_FOREACH(const Stacktrace* s, list)
+    {
+        GetAddresses(ss, s);
+    }
+    s."""
+if get_type_definition(test) != (-1, -1, 's', None, '.'):
+    raise Exception("Got a type definition when it shouldn't have")
 print "all is well"
