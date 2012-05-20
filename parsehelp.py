@@ -289,7 +289,7 @@ def remove_includes(data):
     return data
 
 _invalid = r"""\(\s\{,\*\&\-\+\/;=%\)\"!"""
-_endpattern = r"\;|,|\)|=|\["
+_endpattern = r"\;|,|\)|=|\[|\(\)\s*\;"
 
 
 def patch_up_variable(origdata, data, type, var, ret):
@@ -324,7 +324,7 @@ def extract_variables(data):
     data = remove_functions(data)
     data = remove_namespaces(data)
     data = remove_classes(data)
-    data = re.sub(r"\([^)]*?\)\s*;", "()", data, re.MULTILINE)
+    data = re.sub(r"\([^)]*?\)\s*(?=;)", "()", data, re.MULTILINE)
 
     # first get any variables inside of the function declaration
     funcdata = ";".join(re.findall(r"\(([^)]+\))", data, re.MULTILINE))

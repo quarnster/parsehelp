@@ -518,4 +518,9 @@ test = """        std::vector<Entity*> t;
 if get_type_definition(test) != (1, 30, 'std::vector<Entity*>', 't', '.'):
     raise Exception("Couldn't get the type definition")
 
+test = """Vector3 normal(0,0,0);
+normal."""
+if extract_variables(test) != [('Vector3', 'normal')]:
+    raise Exception("Couldn't extract variables properly")
+
 print "all is well"
