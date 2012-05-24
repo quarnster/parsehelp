@@ -162,7 +162,7 @@ test = """String args[] = cmd.split(" ");
                     if (args[0].equals("-quit"))
                     {
                         args[0]."""
-if get_type_definition(test) != (1, 8, "String[]", "args", "."):
+if get_type_definition(test) != (1, 8, "String", "args", "[]."):
     raise Exception("Couldn't parse type definition properly")
 
 test = """                        foreach (Assembly asm in AssembliesLoaded)
@@ -594,4 +594,32 @@ int set_line_width(lua_State *L)
 if get_type_definition(test) != (31, 13, 'JNIEnv*', 'env', '->'):
     raise Exception("Couldn't get the type definition")
 
+if get_type_definition("C c; c[0].") != (1, 3, 'C', 'c', '[].'):
+    raise Exception("Couldn't get the type definition")
+
+if get_type_definition("tripleA[0].") != (-1, -1, "tripleA", None, "[]."):
+    raise Exception("Couldn't get the type definition")
+
+if get_type_definition("tripleA[0]->") != (-1, -1, "tripleA", None, "[]->"):
+    raise Exception("Couldn't get the type definition")
+
+if get_type_definition("tripleA[0][0].") != (-1, -1, "tripleA", None, "[][]."):
+    raise Exception("Couldn't get the type definition")
+
+if get_type_definition("tripleA[0][0]->") != (-1, -1, "tripleA", None, "[][]->"):
+    raise Exception("Couldn't get the type definition")
+
+if get_type_definition("tripleA[0][0][0].") != (-1, -1, "tripleA", None, "[][][]."):
+    raise Exception("Couldn't get the type definition")
+
+if get_type_definition("tripleA[0][0][0]->") != (-1, -1, "tripleA", None, "[][][]->"):
+    raise Exception("Couldn't get the type definition")
+
+if get_type_definition("tripleA[0][0][0][0].") != (-1, -1, "tripleA", None, "[][][][]."):
+    raise Exception("Couldn't get the type definition")
+
+if dereference("Test**") != "Test*":
+    raise Exception("Couldn't dereference")
+if dereference("Test*") != "Test":
+    raise Exception("Couldn't dereference")
 print "all is well"

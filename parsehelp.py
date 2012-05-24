@@ -327,8 +327,20 @@ def extract_variables(data):
     return ret
 
 
+def dereference(typename):
+    if "*" in typename:
+        return typename.replace("*", "", 1)
+    elif "[]" in typename:
+        return typename.replace("[]", "", 1)
+    return typename
+
+
 def is_pointer(typename):
     return "*" in typename or "[]" in typename
+
+
+def get_pointer_level(typename):
+    return typename.count("*") + typename.count("[]")
 
 
 def get_base_type(data):
@@ -439,11 +451,11 @@ def get_type_definition(data):
     else:
         match = get_var_type(data, var)
     if match == None:
-        return -1, -1, var, None, tocomplete
+        return -1, -1, var, None, extra+tocomplete
     line = data[:match.start(3)].count("\n") + 1
     column = len(data[:match.start(3)].split("\n")[-1])+1
     typename = match.group(1).strip()
-    return line, column, typename+extra, var, tocomplete
+    return line, column, typename, var, extra+tocomplete
 
 
 def template_split(data):
