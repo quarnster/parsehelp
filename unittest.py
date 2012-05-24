@@ -297,7 +297,7 @@ test = """public class Tests {
             }
         }) ) ; // <--- if you type a . in this code (like this: }). ); ) you'll get an error
         foo."""
-if get_type_definition(test) != (4, 42, 'Foo<Foo<String, String>, String>', 'foo', '.'):
+if get_type_definition(test) != (3, 42, 'Foo<Foo<String, String>, String>', 'foo', '.'):
     raise Exception("Couldn't get the type definition")
 
 if make_template((u'Foo', [('java.lang.String', None), ('java.lang.String', None)])) != "Foo<java.lang.String, java.lang.String>":
@@ -314,7 +314,7 @@ test = """public class Tests {
                 return string;
             }
         })."""
-if get_type_definition(test) != (4, 42, 'Foo<Foo<String, String>, String>', 'foo', '.f().'):
+if get_type_definition(test) != (3, 42, 'Foo<Foo<String, String>, String>', 'foo', '.f().'):
     raise Exception("Couldn't get the type definition")
 
 test = """Foo<java.lang.String, Foo<Foo<java.lang.String, java.lang.String>, java.lang.String> >"""
@@ -558,5 +558,40 @@ test = """Call::Call(const char *name, Call* parent, int callDepth)
     """
 if extract_class_from_function(test) != "Call":
     raise Exception("Failed to extract class")
+
+test = """#include <lua.hpp>
+#include <jni.h>
+#include <string.h>
+#include <android/log.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <nv_thread/nv_thread.h>
+
+static lua_State *L = NULL;
+static char luafile[512];
+static jobject thiz;
+long long lastMod = 0;
+
+static long long getModtime(const char *name)
+{
+
+    if (!access(name, R_OK))
+    {
+        struct stat s;
+        stat(name, &s);
+        return s.st_mtime;
+    }
+    return -1;
+}
+
+extern "C"
+{
+int set_line_width(lua_State *L)
+{
+    JNIEnv* env = NVThreadGetCurrentJNIEnv();
+    env->"""
+if get_type_definition(test) != (31, 13, 'JNIEnv*', 'env', '->'):
+    raise Exception("Couldn't get the type definition")
 
 print "all is well"
