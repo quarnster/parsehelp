@@ -344,9 +344,9 @@ def get_pointer_level(typename):
 
 
 def get_base_type(data):
-    data = re.sub(r"\s*const\s*", "", data)
-    data = re.sub(r"\s*static\s*", "", data)
-    data = re.sub(r"\s*struct\s*", "", data)
+    data = re.sub(r"(\s+|^)const(\s|$)", " ", data)
+    data = re.sub(r"(\s|^)static(\s|$)", " ", data)
+    data = re.sub(r"(\s+|^)struct(\s|$)", " ", data)
     data = data.strip()
     data = data.replace("&", "").replace("*", "").replace("[]", "")
     data = data.strip()

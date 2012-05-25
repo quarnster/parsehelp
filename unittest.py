@@ -622,4 +622,15 @@ if dereference("Test**") != "Test*":
     raise Exception("Couldn't dereference")
 if dereference("Test*") != "Test":
     raise Exception("Couldn't dereference")
+
+if get_base_type("mystruct") != "mystruct":
+    raise Exception("Couldn't get the base type")
+if get_base_type("myclass") != "myclass":
+    raise Exception("Couldn't get the base type")
+if get_base_type("mystatic") != "mystatic":
+    raise Exception("Couldn't get the base type")
+if get_base_type("struct A") != "A":
+    raise Exception("Couldn't get the base type")
+if get_base_type("static A") != "A":
+    raise Exception("Couldn't get the base type")
 print "all is well"
