@@ -633,4 +633,19 @@ if get_base_type("struct A") != "A":
     raise Exception("Couldn't get the base type")
 if get_base_type("static A") != "A":
     raise Exception("Couldn't get the base type")
+
+test = """
+typedef std::vector<something> somethingelse;
+template<class blah>
+void myfunc (int i )
+{
+}
+
+class Test
+{
+public:
+    """
+if extract_variables(test) != []:
+    raise Exception("Didn't extract variables properly")
+
 print "all is well"

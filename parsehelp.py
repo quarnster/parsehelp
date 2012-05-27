@@ -147,7 +147,7 @@ def extract_completion(before):
         before = before[:-len(match.group(3))-len(match.group(5))].strip()
     return ret
 
-_keywords = ["return", "new", "delete", "class", "define", "using", "void", "template", "public:", "protected:", "private:", "public", "private", "protected", "typename", "in", "case", "default", "goto"]
+_keywords = ["return", "new", "delete", "class", "define", "using", "void", "template", "public:", "protected:", "private:", "public", "private", "protected", "typename", "in", "case", "default", "goto", "typedef", "struct"]
 
 
 def extract_package(data):
@@ -190,6 +190,7 @@ def extract_class_from_function(data):
     ret = None
     for match in re.finditer(r"(.*?)(\w+)::~?(\w+)\s*\([^);{}]*\)\s*(const)?[^{};]*\s*\{", data, re.MULTILINE):
         ret = match.group(2)
+
     return ret
 
 
@@ -298,6 +299,7 @@ def extract_variables(data):
     data = re.sub(r"\([^)]*?\)\s*(?=;)", "()", data, re.MULTILINE)
     data = re.sub(r"\s*case\s+([\w]+(::)?)+:", "", data, re.MULTILINE)
     data = re.sub(r"\s*default:\s*", "", data, re.MULTILINE)
+    data = re.sub(r"template\s*<>", "", data, re.MULTILINE)
 
     # first get any variables inside of the function declaration
     funcdata = ";".join(re.findall(r"\(([^)]+\))", data, re.MULTILINE))
@@ -317,6 +319,8 @@ def extract_variables(data):
     regex = re.compile(pattern, re.MULTILINE)
 
     for m in regex.finditer(data):
+        if m.group(2) == None:
+            continue
         type = get_base_type(m.group(2))
         if type in _keywords:
             continue
