@@ -648,4 +648,7 @@ public:
 if extract_variables(test) != []:
     raise Exception("Didn't extract variables properly")
 
+test = """std::vector<int> a, b;"""
+if extract_variables(test) != [('std::vector<int>', 'a'), ('std::vector<int>', 'b')]:
+    raise Exception("Didn't extract variables properly")
 print "all is well"

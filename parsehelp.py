@@ -264,11 +264,12 @@ _invalid = r"""\(\s\{,\*\&\-\+\/;=%\)\"!"""
 _endpattern = r"\;|,|\)|=|\[|\(\)\s*\;|:\s+"
 
 
-def patch_up_variable(origdata, data, type, var, ret):
+def patch_up_variable(origdata, data, origtype, var, ret):
+    type = origtype
     var = re.sub(r"\s*=\s*[^;,\)]+", "", var)
     for var in var.split(","):
         var = var.strip()
-        pat = r"%s\s*([^;{]*)%s\s*(%s)" % (re.escape(type), re.escape(var), _endpattern)
+        pat = r"%s\s*([^;{]*)%s\s*(%s)" % (re.escape(origtype), re.escape(var), _endpattern)
         end = re.search(pat, data)
         if end.group(2) == "[":
             type += re.search(r"([\[\]]+)", data[end.start():]).group(1)
@@ -277,7 +278,7 @@ def patch_up_variable(origdata, data, type, var, ret):
             type += var[i:]
             var = var[:i]
         if "<" in type and ">" in type:
-            s = r"\b(%s.+%s)(const)?[\s*&]*(%s)" % (type[:type.find("<")+1], type[type.find(">"):], var)
+            s = r"(%s.+%s)(const)?[^{};]*(%s)" % (type[:type.find("<")+1], type[type.find(">"):], var)
             regex = re.compile(s)
             match = None
             for m in regex.finditer(origdata):
