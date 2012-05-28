@@ -432,13 +432,25 @@ def remove_empty_classes(data):
 
 def get_type_definition(data):
     before = extract_completion(data)
-    match = re.search(r"([^\.\-:]+)[^\.\-:]*(\.|->|::)(.*)", before)
-    var = match.group(1)
+    tocomplete = ""
+    var = None
+    end = None
+    for m in re.finditer(r"([^\.\-,+*/:]+)(\.|->|::)", before):
+        if var != None and m.start(0) != end:
+            var = None
+            tocomplete = ""
+
+        if len(tocomplete):
+            tocomplete += m.group(1)
+        tocomplete += m.group(2)
+        if var == None:
+            var = m.group(1)
+        end = m.end(2)
+
     extra = ""
     if var.endswith("[]"):
         extra = var[var.find("["):]
         var = var[:var.find("[")]
-    tocomplete = before[match.start(2):match.end(3)]
 
     if var == "this":
         clazz = extract_class(data)
@@ -451,7 +463,7 @@ def get_type_definition(data):
         if clazz:
             sup = extract_inheritance(data, clazz)
             return -1, -1, sup, var, tocomplete
-    elif match.group(2) == "::":
+    elif tocomplete.startswith("::"):
         return 0, 0, var, var, tocomplete
     else:
         match = get_var_type(data, var)

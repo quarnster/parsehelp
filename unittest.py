@@ -651,4 +651,26 @@ if extract_variables(test) != []:
 test = """std::vector<int> a, b;"""
 if extract_variables(test) != [('std::vector<int>', 'a'), ('std::vector<int>', 'b')]:
     raise Exception("Didn't extract variables properly")
+
+if get_type_definition("struct timeval t; a+t.") != (1, 16, 'timeval', 't', '.'):
+    raise Exception("Couldn't get the type definition")
+if get_type_definition("struct timeval t; a|t.") != (1, 16, 'timeval', 't', '.'):
+    raise Exception("Couldn't get the type definition")
+if get_type_definition("struct timeval t; a-t.") != (1, 16, 'timeval', 't', '.'):
+    raise Exception("Couldn't get the type definition")
+if get_type_definition("struct timeval t; a*t.") != (1, 16, 'timeval', 't', '.'):
+    raise Exception("Couldn't get the type definition")
+if get_type_definition("struct timeval t; a/t.") != (1, 16, 'timeval', 't', '.'):
+    raise Exception("Couldn't get the type definition")
+
+test = """SwapBuffersData& data = (*i).second;
+        if (++data."""
+if get_type_definition(test) != (1, 18, 'SwapBuffersData&', 'data', '.'):
+    raise Exception("Couldn't get the type definition")
+
+test = """SwapBuffersData& data = (*i).second;
+end.tv_usec-data."""
+if get_type_definition(test) != (1, 18, 'SwapBuffersData&', 'data', '.'):
+    raise Exception("Couldn't get the type definition")
+
 print "all is well"
