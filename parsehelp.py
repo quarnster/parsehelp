@@ -145,6 +145,20 @@ def extract_completion(before):
             break
         ret = match.group(3) + match.group(5) + ret
         before = before[:-len(match.group(3))-len(match.group(5))].strip()
+
+    return ret
+
+
+def extract_completion_objc(before):
+    before = collapse_parenthesis(before)
+    before = before.split("\n")[-1]
+    ret = ""
+    while True:
+        match = re.search(r"(\[\w+(\s+[^\]]+\])?\s+)$", before)
+        if not match:
+            break
+        ret = match.group(1) + ret
+        before = before[:-len(match.group(1))].strip()
     return ret
 
 _keywords = ["return", "new", "delete", "class", "define", "using", "void", "template", "public:", "protected:", "private:", "public", "private", "protected", "typename", "in", "case", "default", "goto", "typedef", "struct"]
@@ -430,12 +444,11 @@ def remove_empty_classes(data):
     return data
 
 
-def get_type_definition(data):
-    before = extract_completion(data)
-    tocomplete = ""
+def get_var_tocomplete(iter):
     var = None
     end = None
-    for m in re.finditer(r"([^\.\-,+*/:]+)(\.|->|::)", before):
+    tocomplete = ""
+    for m in iter:
         if var != None and m.start(0) != end:
             var = None
             tocomplete = ""
@@ -446,6 +459,17 @@ def get_type_definition(data):
         if var == None:
             var = m.group(1)
         end = m.end(2)
+    return var, tocomplete
+
+
+def get_type_definition(data):
+    before = extract_completion(data)
+    if len(before) == 0 and "[" in data:
+        before = extract_completion_objc(data)
+    var, tocomplete = get_var_tocomplete(re.finditer(r"([^\.\-,+*/:]+)(\.|->|::)", before))
+
+    if var == None:
+        var, tocomplete = get_var_tocomplete(re.finditer(r"\[([^\s]+)(\s+.*)", before))
 
     extra = ""
     if var.endswith("[]"):

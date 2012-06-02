@@ -673,4 +673,10 @@ end.tv_usec-data."""
 if get_type_definition(test) != (1, 18, 'SwapBuffersData&', 'data', '.'):
     raise Exception("Couldn't get the type definition")
 
+if get_type_definition("[Hello ") != (-1, -1, 'Hello', None, ' '):
+    raise Exception("Couldn't get the type definition")
+if get_type_definition("Hello *h; [h ") != (1, 8, 'Hello *', 'h', ' '):
+    raise Exception("Couldn't get the type definition")
+if get_type_definition("World * w; [[w world] ") != (1, 9, 'World *', 'w', ' world] '):
+    raise Exception("Couldn't get the type definition")
 print "all is well"
