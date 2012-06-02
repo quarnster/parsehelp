@@ -154,11 +154,13 @@ def extract_completion_objc(before):
     before = before.split("\n")[-1]
     ret = ""
     while True:
-        match = re.search(r"(\[\w+(\s+[^\]]+\])?\s+)$", before)
+        match = re.search(r"([\w\[\]]+\s+[\w\]]+)$", before)
+        if not match:
+            match = re.search(r"([\w\[\]]+\s+)$", before)
         if not match:
             break
         ret = match.group(1) + ret
-        before = before[:-len(match.group(1))].strip()
+        before = before[:-len(match.group(1))]
     return ret
 
 _keywords = ["return", "new", "delete", "class", "define", "using", "void", "template", "public:", "protected:", "private:", "public", "private", "protected", "typename", "in", "case", "default", "goto", "typedef", "struct"]
@@ -470,6 +472,7 @@ def get_type_definition(data):
 
     if var == None:
         var, tocomplete = get_var_tocomplete(re.finditer(r"\[([^\s]+)(\s+.*)", before))
+        var = re.sub(r"^\[*", "", var)
 
     extra = ""
     if var.endswith("[]"):

@@ -679,4 +679,6 @@ if get_type_definition("Hello *h; [h ") != (1, 8, 'Hello *', 'h', ' '):
     raise Exception("Couldn't get the type definition")
 if get_type_definition("World * w; [[w world] ") != (1, 9, 'World *', 'w', ' world] '):
     raise Exception("Couldn't get the type definition")
+if get_type_definition("World2 * w; [[[w world2] world] ") != (1, 10, 'World2 *', 'w', ' world2] world] '):
+    raise Exception("Couldn't get the type definition")
 print "all is well"
