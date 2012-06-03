@@ -219,6 +219,10 @@ def extract_class(data):
     ret = None
     for match in regex.finditer(data):
         ret = match.group(1)
+    if ret == None and "@implementation" in data:
+        regex = re.compile(r"@implementation\s+(\w+)", re.MULTILINE)
+        for match in regex.finditer(data):
+            ret = match.group(1)
     return ret
 
 
@@ -479,7 +483,7 @@ def get_type_definition(data):
         extra = var[var.find("["):]
         var = var[:var.find("[")]
 
-    if var == "this":
+    if var == "this" or var == "self":
         clazz = extract_class(data)
         if clazz == None:
             clazz = extract_class_from_function(data)

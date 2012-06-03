@@ -681,4 +681,26 @@ if get_type_definition("World * w; [[w world] ") != (1, 9, 'World *', 'w', ' wor
     raise Exception("Couldn't get the type definition")
 if get_type_definition("World2 * w; [[[w world2] world] ") != (1, 10, 'World2 *', 'w', ' world2] world] '):
     raise Exception("Couldn't get the type definition")
+test = """@implementation Class1
+- something
+{
+
+}
+@end
+@implementation Class2
+@end
+@implementation Class3
+- samethingelse
+{
+"""
+if extract_class(test) != "Class3":
+    raise Exception("Couldn't extract the class properly")
+
+test = """@implementation World2
+- (World*) world2
+{
+    [self """
+if get_type_definition(test) != (-1, -1, 'World2', 'self', ' '):
+    raise Exception("Couldn't get the type definition")
+
 print "all is well"
