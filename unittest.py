@@ -703,4 +703,7 @@ test = """@implementation World2
 if get_type_definition(test) != (-1, -1, 'World2', 'self', ' '):
     raise Exception("Couldn't get the type definition")
 
+if get_type_definition("""Test.GetSomething2<string, int, int, int>(a, b, c).""") != (-1, -1, 'Test', None, '.GetSomething2<string, int, int, int>().'):
+    raise Exception("Couldn't get the type definition")
+
 print "all is well"
