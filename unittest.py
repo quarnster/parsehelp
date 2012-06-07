@@ -703,4 +703,8 @@ test = """@implementation World2
 if get_type_definition(test) != (-1, -1, 'World2', 'self', ' '):
     raise Exception("Couldn't get the type definition")
 
+test = """static FrameStats::Timestamp skindelta = 0;
+    static int calls = 0; """
+if extract_variables(test) != [('static FrameStats::Timestamp', 'skindelta'), ('static int', 'calls')]:
+    raise Exception("Couldn't extract variables")
 print "all is well"

@@ -324,19 +324,19 @@ def extract_variables(data):
 
     # first get any variables inside of the function declaration
     funcdata = ";".join(re.findall(r"\(([^)]+\))", data, re.MULTILINE))
-    pattern = r"\s*((struct\s*)?\b(const\s*)?[^%s]+[\s*&]+(const)?[\s*&]*)(\b[^%s]+)\s*(?=,|\)|=)" % (_invalid, _invalid)
+    pattern = r"\s*((static\s*)?(struct\s*)?\b(const\s*)?[^%s]+[\s*&]+(const)?[\s*&]*)(\b[^%s]+)\s*(?=,|\)|=)" % (_invalid, _invalid)
     funcvars = re.findall(pattern, funcdata, re.MULTILINE)
     ret = []
     for m in funcvars:
         type = get_base_type(m[0])
         if type in _keywords:
             continue
-        patch_up_variable(origdata, data, m[0].strip(), m[4].strip(), ret)
+        patch_up_variable(origdata, data, m[0].strip(), m[5].strip(), ret)
 
     # Next, take care of all other variables
     data = collapse_parenthesis(data)
 
-    pattern = r"(^\s*|,|\()\s*((struct\s*)?\b(const\s*)?\b[^%s]+[\s*&]+(const)?[\s*&]*)(\b[^;()]+)\s*(?=%s)" % (_invalid, _endpattern)
+    pattern = r"(^\s*|,|\()\s*((static\s*)?(struct\s*)?\b(const\s*)?\b[^%s]+[\s*&]+(const)?[\s*&]*)(\b[^;()]+)\s*(?=%s)" % (_invalid, _endpattern)
     regex = re.compile(pattern, re.MULTILINE)
 
     for m in regex.finditer(data):
@@ -346,7 +346,7 @@ def extract_variables(data):
         if type in _keywords:
             continue
         type = m.group(2).strip()
-        var = m.group(6).strip()
+        var = m.group(7).strip()
         patch_up_variable(origdata, data, type, var, ret)
 
     return ret
