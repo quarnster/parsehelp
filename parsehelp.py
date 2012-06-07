@@ -137,6 +137,7 @@ def collapse_strings(before):
 def extract_completion(before):
     before = collapse_parenthesis(before)
     before = collapse_square_brackets(before)
+    before = collapse_ltgt(before)
     before = before.split("\n")[-1]
     ret = ""
     while True:
@@ -450,7 +451,7 @@ def remove_empty_classes(data):
     return data
 
 
-def get_var_tocomplete(iter):
+def get_var_tocomplete(iter, data):
     var = None
     end = None
     tocomplete = ""
@@ -465,6 +466,14 @@ def get_var_tocomplete(iter):
         if var == None:
             var = m.group(1)
         end = m.end(2)
+    if "<>" in tocomplete:
+        before = re.escape(tocomplete[:tocomplete.find("<")]).replace("\(\)", "\(.*?\)")
+        after = re.escape(tocomplete[tocomplete.rfind(">")+1:]).replace("\(\)", "\(.*?\)")
+        regex = re.compile(r"(%s<.+>%s)" % (before, after), re.MULTILINE)
+        match = None
+        for m in regex.finditer(data):
+            match = m
+        tocomplete = collapse_brackets(collapse_parenthesis(match.group(1)))
     return var, tocomplete
 
 
@@ -472,10 +481,10 @@ def get_type_definition(data):
     before = extract_completion(data)
     if len(before) == 0 and "[" in data:
         before = extract_completion_objc(data)
-    var, tocomplete = get_var_tocomplete(re.finditer(r"([^\.\-,+*/:]+)(\.|->|::)", before))
+    var, tocomplete = get_var_tocomplete(re.finditer(r"([^\.\-,+*/:]+)(\.|->|::)", before), data)
 
     if var == None:
-        var, tocomplete = get_var_tocomplete(re.finditer(r"\[([^\s]+)(\s+.*)", before))
+        var, tocomplete = get_var_tocomplete(re.finditer(r"\[([^\s]+)(\s+.*)", before), data)
         var = re.sub(r"^\[*", "", var)
 
     extra = ""
