@@ -162,7 +162,7 @@ test = """String args[] = cmd.split(" ");
                     if (args[0].equals("-quit"))
                     {
                         args[0]."""
-if get_type_definition(test) != (1, 8, "String", "args", "[]."):
+if get_type_definition(test) != (1, 8, "String[]", "args", "[]."):
     raise Exception("Couldn't parse type definition properly")
 
 test = """                        foreach (Assembly asm in AssembliesLoaded)
@@ -678,7 +678,7 @@ if get_type_definition("[Hello ") != (-1, -1, 'Hello', None, ' '):
 if get_type_definition("Hello *h; [h ") != (1, 8, 'Hello *', 'h', ' '):
     raise Exception("Couldn't get the type definition")
 if get_type_definition("World * w; [[w world] ") != (1, 9, 'World *', 'w', ' world] '):
-    raise Exception("Couldn't get the type definitionG")
+    raise Exception("Couldn't get the type definition")
 if get_type_definition("World2 * w; [[[w world2] world] ") != (1, 10, 'World2 *', 'w', ' world2] world] '):
     raise Exception("Couldn't get the type definition")
 test = """@implementation Class1
@@ -711,4 +711,9 @@ if extract_variables(test) != [('static FrameStats::Timestamp', 'skindelta'), ('
 if get_type_definition("""Test.GetSomething2<string, int, int, int>(a, b, c).""") != (-1, -1, 'Test', None, '.GetSomething2<string, int, int, int>().'):
     raise Exception("Couldn't get the type definition")
 
+if get_type_definition("Test t[10]; t[0].") != (1, 6, 'Test[]', 't', '[].'):
+    raise Exception("Couldn't get the type definition")
+
+if get_type_definition("Test t[10][20]; t.") != (1, 6, 'Test[][]', 't', '.'):
+    raise Exception("Couldn't get the type definition")
 print "all is well"

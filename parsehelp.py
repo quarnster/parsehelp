@@ -509,9 +509,16 @@ def get_type_definition(data):
         match = get_var_type(data, var)
     if match == None:
         return -1, -1, var, None, extra+tocomplete
+
     line = data[:match.start(3)].count("\n") + 1
     column = len(data[:match.start(3)].split("\n")[-1])+1
     typename = match.group(1).strip()
+
+    end = re.search(r"^\s*([^;,=\(\):]*)(;|,|=|\(|\)|:)", data[match.end(3):])
+    if end and end.group(1).startswith("["):
+        end = collapse_square_brackets(data[match.end(3)+end.start(1):match.end(3)+end.end(1)]).strip()
+        typename += end
+
     return line, column, typename, var, extra+tocomplete
 
 
