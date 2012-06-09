@@ -716,4 +716,55 @@ if get_type_definition("Test t[10]; t[0].") != (1, 6, 'Test[]', 't', '[].'):
 
 if get_type_definition("Test t[10][20]; t.") != (1, 6, 'Test[][]', 't', '.'):
     raise Exception("Couldn't get the type definition")
+
+test = """struct mystruct {float x; float y; float z;} m;
+typedef struct {float a; float b; float c; } mystruct2;
+
+enum myenum
+{
+    I1,
+    I2,
+    I3
+};
+
+class A
+{
+public:
+    enum
+    {
+        E1,
+        E2,
+        E3
+    };
+
+    union
+    {
+        float f;
+        int i;
+    };
+    mystruct2 ms;
+};
+
+
+static int variable;
+class MyStaticClass
+{
+public:
+    static int publicStaticField;
+    int publicField;
+protected:
+    static int protectedStaticField;
+    int protectedField;
+private:
+    static int privateStaticField;
+    int privateField;
+};
+
+class Child : public MyStaticClass
+{
+
+};
+"""
+if extract_variables(test) != [('struct mystruct', 'm'), ('enum', 'myenum'), ('static int', 'variable')]:
+    raise Exception("Couldn't extract variables properly")
 print "all is well"

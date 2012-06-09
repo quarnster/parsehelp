@@ -288,6 +288,7 @@ _endpattern = r"\;|,|\)|=|\[|\(\)\s*\;|:\s+"
 def patch_up_variable(origdata, data, origtype, var, ret):
     type = origtype
     var = re.sub(r"\s*=\s*[^;,\)]+", "", var)
+    curlybracere = re.compile(r"\s*(\S+)\s*({})\s*(\S*)", re.MULTILINE)
     for var in var.split(","):
         var = var.strip()
         pat = r"%s\s*([^;{]*)%s\s*(%s)" % (re.escape(origtype), re.escape(var), _endpattern)
@@ -305,7 +306,13 @@ def patch_up_variable(origdata, data, origtype, var, ret):
             for m in regex.finditer(origdata):
                 match = m
             type = match.group(1)
-
+        match = curlybracere.search(var)
+        if match:
+            if match.group(3):
+                var = match.group(3)
+                type += " %s" % match.group(1)
+            else:
+                var = match.group(1)
         ret.append((type, var))
 
 
