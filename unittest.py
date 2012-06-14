@@ -767,4 +767,7 @@ class Child : public MyStaticClass
 """
 if extract_variables(test) != [('struct mystruct', 'm'), ('enum', 'myenum'), ('static int', 'variable')]:
     raise Exception("Couldn't extract variables properly")
+
+if get_type_definition("nms::function().") != (-1, -1, "nms", None, "::function()."):
+    raise Exception("Couldn't get the type definition")
 print "all is well"

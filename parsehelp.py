@@ -511,7 +511,7 @@ def get_type_definition(data):
             sup = extract_inheritance(data, clazz)
             return -1, -1, sup, var, tocomplete
     elif tocomplete.startswith("::"):
-        return 0, 0, var, var, tocomplete
+        return -1, -1, var, None, tocomplete
     else:
         match = get_var_type(data, var)
     if match == None:
