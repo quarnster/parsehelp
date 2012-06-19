@@ -770,4 +770,9 @@ if extract_variables(test) != [('struct mystruct', 'm'), ('enum', 'myenum'), ('s
 
 if get_type_definition("nms::function().") != (-1, -1, "nms", None, "::function()."):
     raise Exception("Couldn't get the type definition")
+
+test = """private static String[] getCompletion() {} String."""
+if get_type_definition(test) != (-1, -1, 'String', None, '.'):
+    raise Exception("Couldn't get the type definition")
+
 print "all is well"

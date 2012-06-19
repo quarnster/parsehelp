@@ -244,7 +244,7 @@ def remove_classes(data):
 
 
 def remove_functions(data):
-    regex = re.compile(r"\S+\s*\([^\)]*\)\s*(const)?[^;{]*\{\}", re.MULTILINE)
+    regex = re.compile(r"([^\s;{}]+\s+)?[^\s;{}]+\s*\([^\)]*\)\s*(const)?[^;{]*\{\}", re.MULTILINE)
     return regex.sub("", data)
 
 
