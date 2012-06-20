@@ -775,4 +775,13 @@ test = """private static String[] getCompletion() {} String."""
 if get_type_definition(test) != (-1, -1, 'String', None, '.'):
     raise Exception("Couldn't get the type definition")
 
+test = """  URL url = classLoader.getResource(s + "/" + packageName);
+            if (url != null)
+                return true;
+            else
+                url = classLoader.getResource(s);
+            url."""
+if get_type_definition(test) != (1, 7, 'URL', 'url', '.'):
+    raise Exception("Couldn't get the type definition")
+
 print "all is well"
