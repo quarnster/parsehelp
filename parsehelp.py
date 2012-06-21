@@ -326,7 +326,7 @@ def extract_variables(data):
     data = remove_namespaces(data)
     data = remove_classes(data)
     data = re.sub(r"\([^)]*?\)\s*(?=;)", "()", data, re.MULTILINE)
-    data = re.sub(r"\s*case\s+([\w]+(::)?)+:", "", data, re.MULTILINE)
+    data = re.sub(r"\s*case\s+[\w:]*[^:]:[^:]", "", data, re.MULTILINE)
     data = re.sub(r"\s*default:\s*", "", data, re.MULTILINE)
     data = re.sub(r"template\s*<>", "", data, re.MULTILINE)
 

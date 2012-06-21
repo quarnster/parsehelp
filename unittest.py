@@ -1,4 +1,5 @@
 from parsehelp import *
+import time
 
 f = open("unittest.cpp")
 fulldata = f.read()
@@ -783,5 +784,15 @@ test = """  URL url = classLoader.getResource(s + "/" + packageName);
             url."""
 if get_type_definition(test) != (1, 7, 'URL', 'url', '.'):
     raise Exception("Couldn't get the type definition")
+
+test = """case kSomethingSomethingSomething:
+            break;
+        case kSomethingSomethingSomt"""
+start = time.time()
+if extract_variables(test) != []:
+    raise Exception("Didn't extract variables correctly")
+end = time.time() - start
+if end > 0.01:
+    raise Exception("Test didn't finish in time")
 
 print "all is well"
