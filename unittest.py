@@ -797,4 +797,16 @@ if end > 0.01:
 
 if extract_namespace("void Test::Class::function() {") != "Test":
     raise Exception("Didn't extract namespace properly")
+
+test = """namespace lir
+{
+    #define NO_ARGUMENT lir::b()
+
+    class a
+    {
+        bool operator==(const a &other) const
+        {
+            other."""
+if extract_class_from_function(test) != None:
+    raise Exception("Didn't extract class properly")
 print "all is well"
