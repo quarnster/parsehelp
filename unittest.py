@@ -795,4 +795,6 @@ end = time.time() - start
 if end > 0.01:
     raise Exception("Test didn't finish in time")
 
+if extract_namespace("void Test::Class::function() {") != "Test":
+    raise Exception("Didn't extract namespace properly")
 print "all is well"

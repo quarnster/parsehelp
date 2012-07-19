@@ -198,6 +198,12 @@ def extract_namespace(data):
         ret += match.group(1)
     if len(ret.strip()) == 0:
         ret = None
+    if ret == None:
+        data = remove_functions(data)
+        regex = re.compile(r"(\w+)::(\w+)::")
+        match = regex.search(data)
+        if match:
+            ret = match.group(1)
     return ret
 
 
