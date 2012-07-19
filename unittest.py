@@ -809,4 +809,16 @@ test = """namespace lir
             other."""
 if extract_class_from_function(test) != None:
     raise Exception("Didn't extract class properly")
+test = """Test t[1]; t[0]."""
+if get_type_definition(test) != (1, 6, 'Test[]', 't', '[].'):
+    raise Exception("Couldn't get the type definition")
+
+test = """typedef struct
+{
+    int something;
+} Test;
+Test t[1]; t[0]."""
+if get_type_definition(test) != (5, 6, 'Test[]', 't', '[].'):
+    raise Exception("Couldn't get the type definition")
+
 print "all is well"
