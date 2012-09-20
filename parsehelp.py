@@ -328,6 +328,7 @@ def extract_variables(data):
     data = remove_preprocessing(data)
     data = remove_includes(data)
     data = collapse_brackets(data)
+    data = collapse_square_brackets(data)
     data = collapse_ltgt(data)
     data = remove_functions(data)
     data = remove_namespaces(data)

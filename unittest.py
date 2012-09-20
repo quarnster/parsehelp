@@ -821,4 +821,6 @@ Test t[1]; t[0]."""
 if get_type_definition(test) != (5, 6, 'Test[]', 't', '[].'):
     raise Exception("Couldn't get the type definition")
 
+if extract_variables("char foo[LENGTH];") != [('char[]', 'foo')]:
+    raise Exception("Didn't extract variables correctly")
 print "all is well"
