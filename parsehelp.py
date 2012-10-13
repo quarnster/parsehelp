@@ -139,6 +139,8 @@ def extract_completion(before):
     before = collapse_square_brackets(before)
     before = collapse_ltgt(before)
     before = before.split("\n")[-1]
+    before = before.split(";")[-1]
+    before = re.sub(r"^\s+", r"", before)
     ret = ""
     while True:
         match = re.search(r"((\.|\->)?([^|.,\ \[\]\(\)\t]+(\(\)|\[\])*)(\.|\->))$", before)
@@ -149,13 +151,14 @@ def extract_completion(before):
 
     return ret
 
-
 def extract_completion_objc(before):
     before = collapse_parenthesis(before)
     before = before.split("\n")[-1]
+    before = before.split(";")[-1]
+    before = re.sub(r"^\s+", r"", before)
     ret = ""
     while True:
-        match = re.search(r"([\w\[\]]+\s+[\w\]]+)$", before)
+        match = re.search(r"([\w\[\]\.\-> ]+([ \t]+|->|.))$", before)
         if not match:
             match = re.search(r"([\w\[\]]+\s+)$", before)
         if not match:
@@ -394,7 +397,7 @@ def get_base_type(data):
 
 
 def get_var_type(data, var):
-    regex = re.compile(r"(const\s*)?\b([^%s]+[ \s\*\&]+)(\s*[^%s]+\,\s*)*(%s)\s*(\[|\(|\;|,|\)|=|:|in\s+)" % (_invalid, _invalid, var), re.MULTILINE)
+    regex = re.compile(r"(const\s*)?\b([^%s]+[ \s\*\&]+)(\s*[^%s]+\,\s*)*(%s)\s*(\[|\(|\;|,|\)|=|:|in\s+)" % (_invalid, _invalid, re.escape(var)), re.MULTILINE)
     origdata = data
     data = remove_preprocessing(data)
     data = collapse_ltgt(data)
@@ -493,12 +496,17 @@ def get_var_tocomplete(iter, data):
 
 def get_type_definition(data):
     before = extract_completion(data)
+    var, tocomplete = None, None
+    objc = False
     if len(before) == 0 and "[" in data:
         before = extract_completion_objc(data)
-    var, tocomplete = get_var_tocomplete(re.finditer(r"([^\.\-,+*/:]+)(\.|->|::)", before), data)
+        objc = True
 
-    if var == None:
-        var, tocomplete = get_var_tocomplete(re.finditer(r"\[([^\s]+)(\s+.*)", before), data)
+    if not objc:
+        var, tocomplete = get_var_tocomplete(re.finditer(r"([^\.\-,+*/:]+)(\.|->|::|[ \t])", before), data)
+
+    if var == None or objc:
+        var, tocomplete = get_var_tocomplete(re.finditer(r"\[?([^ \.\-:]+)((?:[ \t]|\.|->|::).*)", before), data)
         var = re.sub(r"^\[*", "", var)
 
     extra = ""

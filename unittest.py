@@ -823,4 +823,15 @@ if get_type_definition(test) != (5, 6, 'Test[]', 't', '[].'):
 
 if extract_variables("char foo[LENGTH];") != [('char[]', 'foo')]:
     raise Exception("Didn't extract variables correctly")
+if get_type_definition("Test t; [t.context ") != (1, 6, 'Test', 't', '.context '):
+    raise Exception("Couldn't get the type definition")
+if get_type_definition("Test t; [t.context->b ") != (1, 6, 'Test', 't', '.context->b '):
+    raise Exception("Couldn't get the type definition")
+if get_type_definition("Test t; [[t.context->b something] ") != (1, 6, 'Test', 't', '.context->b something] '):
+    raise Exception("Couldn't get the type definition")
+if get_type_definition("Test t; [[t.context->b something] something2]->") != (1, 6, 'Test', 't', '.context->b something] something2]->'):
+    raise Exception("Couldn't get the type definition")
+if get_type_definition("Test t; [[t.context->b something] something2].") != (1, 6, 'Test', 't', '.context->b something] something2].'):
+    raise Exception("Couldn't get the type definition")
+
 print "all is well"
