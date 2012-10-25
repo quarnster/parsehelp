@@ -254,8 +254,12 @@ def remove_classes(data):
 
 
 def remove_functions(data):
-    regex = re.compile(r"([^\s;{}]+\s+)?[^\s;{}]+\s*\([^\)]*\)\s*(const)?[^;{]*\{\}", re.MULTILINE)
-    return regex.sub("", data)
+    regex = sub(r"""(?x)
+            ([^;{}]+\s+)?
+            [^\s;{}]+\s*\([^\)]*\)\s*       # function name + possible space + parenthesis
+            (const)?                        # Possibly a const function
+            [^;{]*\{\}""", data)
+    return regex
 
 
 def remove_namespaces(data):
@@ -355,7 +359,19 @@ def extract_variables(data):
     # Next, take care of all other variables
     data = collapse_parenthesis(data)
 
-    pattern = r"(^|,|\()\s*((static\s*)?(struct\s*)?\b(const\s*)?\b[^%s]+[\s*&]+(const)?[\s*&]*)(\b[^;()]+)\s*(?=%s)" % (_invalid, _endpattern)
+    pattern = r"""(?x)
+        (^|,|\()\s*
+            (
+                (static\s*)?
+                (struct\s*)?
+                \b(const\s*)?\b
+                [^%s]+
+                [\s*&]+
+                (const)?
+                [\s*&]*
+            )                   # type name
+            (\b[^;()]+)\s*      # variable name
+            (?=%s)""" % (_invalid, _endpattern)
     regex = re.compile(pattern, re.MULTILINE)
 
     for m in regex.finditer(data):
