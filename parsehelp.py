@@ -209,13 +209,13 @@ def extract_namespace(data):
             ret = match.group(1)
     return ret
 
-
 def extract_class_from_function(data):
-    data = collapse_brackets(data)
-    data = remove_functions(data)
     data = remove_preprocessing(data)
+    data = collapse_brackets(data)
+    data = collapse_parenthesis(data)
+    data = remove_functions(data)
     ret = None
-    for match in re.finditer(r"(.*?)(\w+)::~?(\w+)\s*\([^);{}]*\)\s*(const)?[^{};]*\s*\{", data, re.MULTILINE):
+    for match in re.finditer(r"(.*?)(\w+)::~?(\w+)\s*\(\)(\s+const)?[^{};]*\{", data, re.MULTILINE):
         ret = match.group(2)
 
     return ret
@@ -255,9 +255,9 @@ def remove_classes(data):
 
 def remove_functions(data):
     regex = sub(r"""(?x)
-            ([^;{}]+\s+)?
-            [^\s;{}]+\s*\([^\)]*\)\s*       # function name + possible space + parenthesis
-            (const)?                        # Possibly a const function
+            (?:[^{};]+\s+)?
+            [^\s;{}]+\s*\([^)]*\)\s*        # function name + possible space + parenthesis
+            (?:const)?                      # Possibly a const function
             [^;{]*\{\}""", data)
     return regex
 
@@ -344,6 +344,7 @@ def extract_variables(data):
     data = re.sub(r"\s*case\s+[\w:]*[^:]:[^:]", "", data, re.MULTILINE)
     data = re.sub(r"\s*default:\s*", "", data, re.MULTILINE)
     data = re.sub(r"template\s*<>", "", data, re.MULTILINE)
+    data = re.sub(r"\s{2,}", " ", data, re.MULTILINE)
 
     # first get any variables inside of the function declaration
     funcdata = ";".join(re.findall(r"\(([^)]+\))", data, re.MULTILINE))
@@ -360,7 +361,7 @@ def extract_variables(data):
     data = collapse_parenthesis(data)
 
     pattern = r"""(?x)
-        (^|,|\()\s*
+        (^|,|\(|;|\{)\s*
             (
                 (static\s*)?
                 (struct\s*)?
