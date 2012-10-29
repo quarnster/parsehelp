@@ -622,9 +622,11 @@ def extract_word_at_offset(data, offset):
     line = extract_line_at_offset(data, offset)
     begin = 0
     end = 0
-    match = re.search(r"\b\w*$", line[0:column-1])
+    match = re.search(r"\b\w*$", line[0:column])
     if match:
         begin = match.start()
+    else:
+        return ""
     match = re.search(r"^\w*", line[begin:])
     if match:
         end = begin+match.end()
