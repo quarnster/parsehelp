@@ -22,7 +22,26 @@ freely, subject to the following restrictions:
 """
 import re
 
+__DEBUG = False
+if __DEBUG:
+    __indent = ""
+    def debug(func):
+        import time
+        def __wrapped(*args):
+            global __indent
+            s = time.time()
+            __indent += "\t"
+            ret = func(*args)
+            e = time.time()
+            __indent = __indent[:-1]
+            print "%s%s took %f ms" % (__indent, func.__name__, 1000*(e-s))
+            return ret
+        return __wrapped
+else:
+    def debug(func):
+        return func
 
+@debug
 def count_brackets(data):
     even = 0
     for i in range(len(data)):
@@ -33,6 +52,7 @@ def count_brackets(data):
     return even
 
 
+@debug
 def collapse_generic(before, open, close):
     i = len(before)
     count = 0
@@ -59,18 +79,22 @@ def collapse_generic(before, open, close):
     return before
 
 
+@debug
 def collapse_brackets(before):
     return collapse_generic(before, "{", "}")
 
 
+@debug
 def collapse_parenthesis(before):
     return collapse_generic(before, '(', ')')
 
 
+@debug
 def collapse_square_brackets(before):
     return collapse_generic(before, '[', ']')
 
 
+@debug
 def collapse_ltgt(before):
     i = len(before)
     count = 0
@@ -114,6 +138,7 @@ def collapse_ltgt(before):
     return before
 
 
+@debug
 def collapse_strings(before):
     i = len(before)
     count = 0
@@ -134,6 +159,7 @@ def collapse_strings(before):
     return before
 
 
+@debug
 def extract_completion(before):
     before = collapse_parenthesis(before)
     before = collapse_square_brackets(before)
@@ -151,6 +177,7 @@ def extract_completion(before):
 
     return ret
 
+@debug
 def extract_completion_objc(before):
     before = collapse_parenthesis(before)
     before = before.split("\n")[-1]
@@ -170,6 +197,7 @@ def extract_completion_objc(before):
 _keywords = ["return", "new", "delete", "class", "define", "using", "void", "template", "public:", "protected:", "private:", "public", "private", "protected", "typename", "in", "case", "default", "goto", "typedef", "struct", "else"]
 
 
+@debug
 def extract_package(data):
     data = remove_preprocessing(data)
     match = re.search(r"package\s([\w.]+);", data)
@@ -178,6 +206,7 @@ def extract_package(data):
     return None
 
 
+@debug
 def extract_used_namespaces(data):
     regex = re.compile(r"\s*using\s+(namespace\s+)?([^;]+)", re.MULTILINE)
     ret = []
@@ -189,6 +218,7 @@ def extract_used_namespaces(data):
     return ret
 
 
+@debug
 def extract_namespace(data):
     data = remove_preprocessing(data)
     data = collapse_brackets(data)
@@ -209,6 +239,7 @@ def extract_namespace(data):
             ret = match.group(1)
     return ret
 
+@debug
 def extract_class_from_function(data):
     data = remove_preprocessing(data)
     data = collapse_brackets(data)
@@ -221,6 +252,7 @@ def extract_class_from_function(data):
     return ret
 
 
+@debug
 def extract_class(data):
     data = remove_preprocessing(data)
     data = collapse_brackets(data)
@@ -237,6 +269,7 @@ def extract_class(data):
     return ret
 
 
+@debug
 def extract_inheritance(data, classname):
     data = remove_preprocessing(data)
     data = collapse_brackets(data)
@@ -248,25 +281,31 @@ def extract_inheritance(data, classname):
     return None
 
 
+@debug
 def remove_classes(data):
     regex = re.compile(r"class\s+[^{]+{\}\s*;?", re.MULTILINE)
     return regex.sub("", data)
 
 
+@debug
 def remove_functions(data):
+    # First remove for-loops
+    data = sub(r"""(?:\s|^)for\s*\([^;{}]*;[^;{}]*;[^{})]*\)\s*\{\}""", data)
     regex = sub(r"""(?x)
-            (?:[^{};]+\s+)?
-            [^\s;{}]+\s*\([^)]*\)\s*        # function name + possible space + parenthesis
+            (?:[^,{};]+\s+)?
+            [^\s,;{}]+\s*\([^{};]*\)\s*     # function name + possible space + parenthesis
             (?:const)?                      # Possibly a const function
             [^;{]*\{\}""", data)
     return regex
 
 
+@debug
 def remove_namespaces(data):
     regex = re.compile(r"\s*namespace\s+[^{]+\s*\{\}\s*", re.MULTILINE)
     return regex.sub("", data)
 
 
+@debug
 def sub(exp, data):
     regex = re.compile(exp, re.MULTILINE|re.DOTALL)
     while True:
@@ -277,6 +316,7 @@ def sub(exp, data):
     return data
 
 
+@debug
 def remove_preprocessing(data):
     data = data.replace("\\\n", " ")
     data = sub(r"\#\s*define[^\n]+\n", data)
@@ -286,6 +326,7 @@ def remove_preprocessing(data):
     return data
 
 
+@debug
 def remove_includes(data):
     regex = re.compile(r"""\#\s*include\s+(<|")[^>"]+(>|")""")
     while True:
@@ -299,6 +340,7 @@ _invalid = r"""\(\s\{,\*\&\-\+\/;=%\)\"!"""
 _endpattern = r"\;|,|\)|=|\[|\(\)\s*\;|:\s+"
 
 
+@debug
 def patch_up_variable(origdata, data, origtype, var, ret):
     type = origtype
     var = re.sub(r"\s*=\s*[^;,\)]+", "", var)
@@ -329,9 +371,10 @@ def patch_up_variable(origdata, data, origtype, var, ret):
                 var = match.group(1)
         ret.append((type, var))
 
-
+@debug
 def extract_variables(data):
     origdata = data
+
     data = remove_preprocessing(data)
     data = remove_includes(data)
     data = collapse_brackets(data)
@@ -387,6 +430,7 @@ def extract_variables(data):
     return ret
 
 
+@debug
 def dereference(typename):
     if "*" in typename:
         return typename.replace("*", "", 1)
@@ -395,14 +439,17 @@ def dereference(typename):
     return typename
 
 
+@debug
 def is_pointer(typename):
     return "*" in typename or "[]" in typename
 
 
+@debug
 def get_pointer_level(typename):
     return typename.count("*") + typename.count("[]")
 
 
+@debug
 def get_base_type(data):
     data = re.sub(r"(\s+|^)const(\s|$)", " ", data)
     data = re.sub(r"(\s|^)static(\s|$)", " ", data)
@@ -413,6 +460,7 @@ def get_base_type(data):
     return data
 
 
+@debug
 def get_var_type(data, var):
     regex = re.compile(r"(const\s*)?\b([^%s]+[ \s\*\&]+)(\s*[^%s]+\,\s*)*(%s)\s*(\[|\(|\;|,|\)|=|:|in\s+)" % (_invalid, _invalid, re.escape(var)), re.MULTILINE)
     origdata = data
@@ -480,11 +528,13 @@ def get_var_type(data, var):
     return match
 
 
+@debug
 def remove_empty_classes(data):
     data = sub(r"\s*class\s+[^\{]+\s*\{\}", data)
     return data
 
 
+@debug
 def get_var_tocomplete(iter, data):
     var = None
     end = None
@@ -511,6 +561,7 @@ def get_var_tocomplete(iter, data):
     return var, tocomplete
 
 
+@debug
 def get_type_definition(data):
     before = extract_completion(data)
     var, tocomplete = None, None
@@ -561,6 +612,7 @@ def get_type_definition(data):
     return line, column, typename, var, extra+tocomplete
 
 
+@debug
 def template_split(data):
     if data == None:
         return None
@@ -578,6 +630,7 @@ def template_split(data):
     return ret
 
 
+@debug
 def solve_template(typename):
     args = []
     template = re.search(r"([^<]+)(<(.+)>)?((::|.)(.+))?$", typename)
@@ -593,6 +646,7 @@ def solve_template(typename):
     return template.group(1), args
 
 
+@debug
 def make_template(data, concat="."):
     if data[1] != None:
         ret = ""
@@ -608,15 +662,18 @@ def make_template(data, concat="."):
     return data[0]
 
 
+@debug
 def extract_line_until_offset(data, offset):
     return data[:offset].split("\n")[-1]
 
 
+@debug
 def extract_line_at_offset(data, offset):
     line = data[:offset].count("\n")
     return data.split("\n")[line]
 
 
+@debug
 def extract_word_at_offset(data, offset):
     line, column = get_line_and_column_from_offset(data, offset)
     line = extract_line_at_offset(data, offset)
@@ -634,6 +691,7 @@ def extract_word_at_offset(data, offset):
     return word
 
 
+@debug
 def extract_extended_word_at_offset(data, offset):
     line, column = get_line_and_column_from_offset(data, offset)
     line = extract_line_at_offset(data, offset)
@@ -644,6 +702,7 @@ def extract_extended_word_at_offset(data, offset):
     return extword
 
 
+@debug
 def get_line_and_column_from_offset(data, offset):
     data = data[:offset].split("\n")
     line = len(data)
@@ -653,6 +712,7 @@ def get_line_and_column_from_offset(data, offset):
     return line, column
 
 
+@debug
 def get_offset_from_line_and_column(data, line, column):
     data = data.split("\n")
     offset = len("\n".join(data[:line-1])) + column
