@@ -290,12 +290,14 @@ def remove_classes(data):
 @debug
 def remove_functions(data):
     # First remove for-loops
-    data = sub(r"""(?:\s|^)for\s*\([^;{}]*;[^;{}]*;[^{})]*\)\s*\{\}""", data)
+    data = sub(r"""(?:\s|^)for\s*\([^;{}]*;[^;{}]*;[^{}]*\)\s*\{\}""", data)
     regex = sub(r"""(?x)
-            (?:[^,{};]+\s+)?
-            [^\s,;{}]+\s*\([^{};]*\)\s*     # function name + possible space + parenthesis
-            (?:const)?                      # Possibly a const function
-            [^;{]*\{\}""", data)
+            (?:[^\s,{};()]+\s+)?            # Possible return type. Optional because it will then
+                                            # remove # while loops, preprocessor macros, constructors,
+                                            # destructors, etc
+            [^\s,;{}]+\s*\([^{};]*\)        # function name + possible space + parenthesis
+            [^;{]*                          # Any extras like initializers, const, etc
+            \{\}""", data)
     return regex
 
 
