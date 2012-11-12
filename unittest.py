@@ -14,6 +14,8 @@ f = open("unittest.cpp")
 fulldata = f.read()
 f.close()
 
+__start = time.time()
+
 offset = 10
 line, column = get_line_and_column_from_offset(fulldata, offset)
 offset2 = get_offset_from_line_and_column(fulldata, line, column)
@@ -724,6 +726,10 @@ data = "\n".join("\tENUM_%d = %d," % (a, a) for a in range(5000))
 start = time.time()
 myassert(extract_variables(data), [])
 end = time.time() - start
-assert end < 0.15
+assert end < 0.09
+
+end = time.time() - __start
+print "Tests took %f seconds" % end
+assert end < 0.220
 
 print "all is well"
