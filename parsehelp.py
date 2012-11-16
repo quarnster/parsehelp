@@ -666,12 +666,14 @@ def make_template(data, concat="."):
 
 @debug
 def extract_line_until_offset(data, offset):
-    return data[:offset].split("\n")[-1]
+    return data[:offset+1].split("\n")[-1]
 
 
 @debug
 def extract_line_at_offset(data, offset):
-    line = data[:offset].count("\n")
+    if offset < 0 or offset >= len(data) or data[offset] == "\n":
+        return ""
+    line = data[:offset+1].count("\n")
     return data.split("\n")[line]
 
 
@@ -708,14 +710,14 @@ def extract_extended_word_at_offset(data, offset):
 def get_line_and_column_from_offset(data, offset):
     data = data[:offset].split("\n")
     line = len(data)
-    column = len(data[-1])
-    if line > 1:
-        column += 1
+    column = len(data[-1]) + 1
     return line, column
 
 
 @debug
 def get_offset_from_line_and_column(data, line, column):
     data = data.split("\n")
+    if line == 1:
+        column -= 1
     offset = len("\n".join(data[:line-1])) + column
     return offset
