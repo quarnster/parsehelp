@@ -2362,6 +2362,9 @@ myassert(extract_variables(data), [])
 end = time.time() - start
 assert end < 0.09
 
+for char in "!+-*/[&<>(;,":
+    myassert(get_type_definition("A a; %ca." %  char), (1, 3, 'A', 'a', '.'))
+
 end = time.time() - __start
 print "Tests took %f seconds" % end
 assert end < 0.300

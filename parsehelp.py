@@ -573,7 +573,7 @@ def get_type_definition(data):
         objc = True
 
     if not objc:
-        var, tocomplete = get_var_tocomplete(re.finditer(r"([^\.\-,+*/:]+)(\.|->|::|[ \t])", before), data)
+        var, tocomplete = get_var_tocomplete(re.finditer(r"(\w+(?:[^\.\-,+*/:]*))(\.|->|::|[ \t])", before), data)
 
     if var == None or objc:
         var, tocomplete = get_var_tocomplete(re.finditer(r"\[?([^ \.\-:]+)((?:[ \t]|\.|->|::).*)", before), data)
