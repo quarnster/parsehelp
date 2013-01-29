@@ -34,7 +34,7 @@ if __DEBUG:
             ret = func(*args)
             e = time.time()
             __indent = __indent[:-1]
-            print "%s%s took %f ms" % (__indent, func.__name__, 1000*(e-s))
+            print("%s%s took %f ms" % (__indent, func.__name__, 1000*(e-s)))
             return ret
         return __wrapped
 else:
